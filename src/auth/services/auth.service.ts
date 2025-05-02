@@ -39,13 +39,10 @@ export class AuthService {
             throw new UnauthorizedException('Wrong password.');
         }
 
-        const payload = { email: user.email };
+        const payload = { sub: user.id, role: user.rol };
         const token = await this.jwtService.signAsync(payload);
 
-        return {
-            token,
-            email,
-        }
+        return token;
     }
 
 }
