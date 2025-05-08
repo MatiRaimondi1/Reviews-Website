@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, DeleteDateColumn, CreateDateColumn } from "typeorm";
+import { Review } from "src/reviews/entities/review.entity";
+import { Entity, PrimaryGeneratedColumn, Column, DeleteDateColumn, CreateDateColumn, OneToMany } from "typeorm";
 
 @Entity()
 export class User {
@@ -25,6 +26,9 @@ export class User {
 
     @Column({ default: "./img/defaultUser.png" })
     urlImagen: string;
+
+    @OneToMany(() => Review, review => review.user)
+    reviews: Review[];
 
     @DeleteDateColumn()
     deletedAt: Date;
