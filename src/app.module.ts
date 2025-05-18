@@ -7,6 +7,8 @@ import { AuthModule } from './auth/auth.module';
 
 import { ConfigModule } from '@nestjs/config';
 import { ReviewsModule } from './reviews/reviews.module';
+import { GrupoModule } from './grupos/grupo.module';
+import { ComentariosModule } from './comentarios/comentarios.module';
 
 @Module({
   imports: [
@@ -29,6 +31,8 @@ import { ReviewsModule } from './reviews/reviews.module';
     UsersModule,
     AuthModule,
     ReviewsModule,
+    GrupoModule,
+    ComentariosModule,
   ],
   controllers: [],
   providers: [],
