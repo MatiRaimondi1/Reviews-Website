@@ -6,12 +6,12 @@ export class RolesGuard implements CanActivate {
     constructor (private reflector: Reflector) {}
 
     canActivate(context: ExecutionContext): boolean {
-        const requiredRole = this.reflector.get<string>('role', context.getHandler());
-        if (!requiredRole) return true;
+        const requiredRoles = this.reflector.get<string[]>('roles', context.getHandler());
+        if (!requiredRoles || requiredRoles.length === 0) return true;
 
         const { user } = context.switchToHttp().getRequest();
 
-        if (user?.role !== requiredRole) {
+        if (!user || !requiredRoles.includes(user.role)) {
             throw new ForbiddenException('Access denied.');
         }
 
