@@ -14,15 +14,20 @@ export class PeliculasService {
         private peliculasRepo: Repository<Pelicula>,
     ) {}
 
-    findAll() {
-        return this.peliculasRepo.find();
+    findAll(page = 0) {
+        const limit = 10;
+        const offset = page * limit;
+        return this.peliculasRepo.find({
+            skip: offset,
+            take: limit,
+        });
     }
 
-    findOne(id: number) {
+    async findOne(id: number) {
         return this.peliculasRepo.findOneBy({ id });
     }
 
-    create(body: CreatePeliculaDto) {
+    async create(body: CreatePeliculaDto) {
         const newPelicula = this.peliculasRepo.create(body);
         return this.peliculasRepo.save(newPelicula);
     }

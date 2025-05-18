@@ -6,25 +6,25 @@ export class Pelicula {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column()
+    @Column({ unique: true, nullable: false })
     nombre: string;
 
-    @Column()
+    @Column({ nullable: false })
     sinopsis: string;
 
-    @Column()
+    @Column({ nullable: false })
     genero: string;
 
     @Column({ type: 'date' })
     fechaEstreno: Date;
 
-    @Column()
+    @Column({ nullable: false })
     duracion: number;
 
     @Column()
     urlImagen: string;
 
-    @Column()
+    @Column({ nullable: false })
     calificacion: number;
 
     @OneToMany(() => Review, review => review.pelicula)
