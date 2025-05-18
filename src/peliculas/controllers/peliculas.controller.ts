@@ -5,23 +5,49 @@ import { UpdatePeliculaDto } from '../dto/update-pelicula.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { Role } from 'src/auth/decorators/role.decorator';
 
+/**
+ * Controlador que maneja las rutas relacionadas con películas.
+ */
 @Controller('api/peliculas')
 export class PeliculasController {
 
+    /**
+     * Inyecta el servicio de películas.
+     * @param peliculasService Servicio que contiene la lógica de negocio de películas.
+     */
     constructor(
         private peliculasService: PeliculasService
     ) {}
     
+    /**
+     * Obtiene una lista paginada de películas.
+     * 
+     * @param page Número de página (opcional). Por defecto, 0.
+     * @returns Lista de películas.
+     */
     @Get()
     findAll(@Query('page') page = 0) {
         return this.peliculasService.findAll(+page);
     }
 
+     /**
+     * Obtiene una película por su ID.
+     * 
+     * @param id ID de la película.
+     * @returns Película encontrada.
+     */
     @Get(':id')
     findOne(@Param('id') id: number) {
         return this.peliculasService.findOne(id);
     }
 
+    /**
+     * Crea una nueva película.
+     * Solo accesible por usuarios con rol "admin".
+     * 
+     * @param body Datos para crear la película.
+     * @returns Película creada.
+     */
     @UseGuards(JwtAuthGuard)
     @Role('admin')
     @Post()
@@ -29,6 +55,14 @@ export class PeliculasController {
         return this.peliculasService.create(body);
     }
 
+    /**
+     * Actualiza una película existente.
+     * Solo accesible por usuarios con rol "admin".
+     * 
+     * @param id ID de la película a actualizar.
+     * @param body Datos nuevos de la película.
+     * @returns Película actualizada.
+     */
     @UseGuards(JwtAuthGuard)
     @Role('admin')
     @Put(':id')
@@ -36,11 +70,17 @@ export class PeliculasController {
         return this.peliculasService.update(id, body);
     }
 
+    /**
+     * Elimina una película por su ID.
+     * Solo accesible por usuarios con rol "admin".
+     * 
+     * @param id ID de la película a eliminar.
+     * @returns `true` si la operación fue exitosa.
+     */
     @UseGuards(JwtAuthGuard)
     @Role('admin')
     @Delete(':id')
     delete(@Param('id') id: number) {
         return this.peliculasService.delete(id);
     }
-
 }
