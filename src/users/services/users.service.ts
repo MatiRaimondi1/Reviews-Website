@@ -13,27 +13,19 @@ export class UsersService {
     private readonly userRepo: Repository<User>,
   ) {}
 
-  create(createUserDto: CreateUserDto) {
+  async create(createUserDto: CreateUserDto) {
     return this.userRepo.save(createUserDto);
   }
 
-  findOneByEmail(email: string) {
+  async findOneByEmail(email: string) {
     return this.userRepo.findOneBy({ email });
   }
 
-  findAll() {
-    return `This action returns all users`;
+  async findAll() {
+    return this.userRepo.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
-  }
-
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async findOne(id: number) {
+    return this.userRepo.findOneBy({ id });
   }
 }
