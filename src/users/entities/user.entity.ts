@@ -1,5 +1,7 @@
+import { Comentario } from "src/comentarios/entities/comentario.entity";
+import { MembresiaGrupo } from "src/grupos/entities/membresiaGrupo.entity";
 import { Review } from "src/reviews/entities/review.entity";
-import { Entity, PrimaryGeneratedColumn, Column, DeleteDateColumn, CreateDateColumn, OneToMany } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, DeleteDateColumn, CreateDateColumn, OneToMany, ManyToMany } from "typeorm";
 
 @Entity()
 export class User {
@@ -32,4 +34,10 @@ export class User {
 
     @DeleteDateColumn()
     deletedAt: Date;
+
+    @OneToMany(() => MembresiaGrupo, (mg) => mg.user)
+    gruposRelacionados: MembresiaGrupo[];
+
+    @OneToMany(() => Comentario, comentario => comentario.review)
+    comentarios: Comentario[];
 }
