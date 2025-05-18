@@ -5,12 +5,15 @@ import { ReviewsService } from "./services/reviews.service";
 import { ReviewsController } from "./controllers/reviews.controller";
 import { UsersModule } from "src/users/users.module";
 import { PeliculasModule } from "src/peliculas/peliculas.module";
+import { GrupoModule } from "src/grupos/grupo.module";
+import { Grupo } from "src/grupos/entities/grupo.entity";
 
 @Module({
     imports: [
-        TypeOrmModule.forFeature([Review]),
+        TypeOrmModule.forFeature([Review, Grupo]),
         UsersModule,
         PeliculasModule,
+        GrupoModule,
     ],
     providers: [ReviewsService],
     controllers: [ReviewsController]
