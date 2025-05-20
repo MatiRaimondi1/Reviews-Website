@@ -4,10 +4,21 @@ import { CreateReviewDto } from "../dto/create-review.dto";
 import { JwtAuthGuard } from "src/auth/guards/jwt-auth.guard";
 import { Role } from "src/auth/decorators/role.decorator";
 
+/**
+ * Controlador encargado de manejar las requests relativas a las reviews
+ */
 @Controller('api/reviews')
 export class ReviewsController {
     constructor(private readonly reviewsService: ReviewsService) {}
 
+    /**
+     * Crea una nueva review
+     * 
+     * @param peliculaId ID de la pelicula de la cual la review se trata
+     * @param dto el DTO definido para la creacion de una review
+     * @param req El objeto de la request de HTTP
+     * @returns La nueva review
+     */
     @UseGuards(JwtAuthGuard)
     @Role('user', 'admin')
     @Post(':peliculaId')
@@ -22,11 +33,25 @@ export class ReviewsController {
         return this.reviewsService.create(dto, userId, peliculaId, grupoId);
     }
 
+    /**
+     * Obtiene una promesa con todas las reviews de una pelicula en especifico, junto con el usuario
+     * que la publico, en base a la ID de la pelicula
+     * 
+     * @param peliculaId ID de la pelicula a buscar
+     * @returns Promesa con las reviews
+     */
     @Get(':peliculaId')
     async findByPelicula(@Param('peliculaId', ParseIntPipe) peliculaId: number) {
         return this.reviewsService.findByPelicula(peliculaId);
     }
 
+    /**
+     * Borra una review
+     * 
+     * @param id ID de la review a borrar
+     * @param req El objeto de la request de HTTP
+     * @returns La promesa de la eliminacion de la review
+     */
     @UseGuards(JwtAuthGuard)
     @Role('user', 'admin')
     @Delete(':id')
