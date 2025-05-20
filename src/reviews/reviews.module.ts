@@ -8,6 +8,10 @@ import { PeliculasModule } from "src/peliculas/peliculas.module";
 import { GrupoModule } from "src/grupos/grupo.module";
 import { Grupo } from "src/grupos/entities/grupo.entity";
 
+/**
+ * Encapsula los providers de la entidad Reviews, y define que partes 
+ * pueden importarse en otros modulos
+ */
 @Module({
     imports: [
         TypeOrmModule.forFeature([Review, Grupo]),
