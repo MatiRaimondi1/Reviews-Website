@@ -8,13 +8,18 @@ import { CreateUserDto } from '../dto/create-user.dto';
 
 @Controller('api/users')
 export class UsersController {
+
+  /**
+   * Inyecta el servicio de Users
+   * @param usersService Servicio que contiene la logica de negocio de Users
+   */
   constructor(private readonly usersService: UsersService) {}
   
   /**
    * Crea un nuevo usuario
    * 
    * @param createUserDto el DTO definido para la creacion de un usuario
-   * @returns 
+   * @returns El nuevo usuario
    */
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
