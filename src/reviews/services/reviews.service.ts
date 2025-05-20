@@ -7,8 +7,15 @@ import { Pelicula } from "src/peliculas/entities/pelicula.entity";
 import { CreateReviewDto } from "../dto/create-review.dto";
 import { Grupo } from "src/grupos/entities/grupo.entity";
 
+/**
+ * Servicio encargado de gestionar las operaciones relacionadas con las reviews
+ */
 @Injectable()
 export class ReviewsService {
+
+    /**
+     * Inyecta los repositorios
+     */
     constructor(
         @InjectRepository(Review) private reviewsRepo: Repository<Review>,
         @InjectRepository(User) private usersRepo: Repository<User>,
@@ -16,6 +23,15 @@ export class ReviewsService {
         @InjectRepository(Grupo) private grupoRepo: Repository<Grupo>,
     ) {}
 
+    /**
+     * Logica de la creacion de una Review
+     * 
+     * @param dto el DTO definido para la creacion de una review
+     * @param userId ID del usuario que publica la review
+     * @param peliculaId ID de la pelicula de la cual la review se trata
+     * @param grupoId ID del grupo que publica la review, en caso de ser necesario
+     * @returns Promesa con la creacion de la nueva review
+     */
     async create(dto: CreateReviewDto, userId: number, peliculaId: number, grupoId?: number) {
         const user = await this.usersRepo.findOneBy({ id: userId });
         const pelicula = await this.peliculasRepo.findOneBy({ id: peliculaId });
@@ -70,6 +86,12 @@ export class ReviewsService {
         }
     }
 
+    /**
+     * Logica de la busqueda de reviews sobre una pelicula especifica
+     * 
+     * @param peliculaId ID de la pelicula a buscar
+     * @returns Promesa con las reviews encontradas junto a los usuarios que las publicaron
+     */
     async findByPelicula(peliculaId: number) {
         return this.reviewsRepo.find({
             where: {
@@ -79,6 +101,12 @@ export class ReviewsService {
         });
     }
 
+    /**
+     * Logica para la eliminacion de una review
+     * 
+     * @param id ID de la review a borrar
+     * @param userId ID del usuario que quiere realizar esta accion
+     */
     async delete(id: number, userId: number) {
         const review = await this.reviewsRepo.findOne({
             where: { id },
