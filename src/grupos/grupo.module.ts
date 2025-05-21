@@ -6,6 +6,10 @@ import { User } from "src/users/entities/user.entity";
 import { GrupoController } from "./controllers/grupo.controller";
 import { GrupoService } from "./services/grupo.service";
 
+/**
+ * Encapsula los providers de la entidad Grupo, y define que partes 
+ * pueden importarse en otros modulos
+ */
 @Module({
     imports: [TypeOrmModule.forFeature([Grupo, MembresiaGrupo, User])],
     controllers: [GrupoController],
