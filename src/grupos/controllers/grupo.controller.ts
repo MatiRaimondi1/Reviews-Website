@@ -6,25 +6,51 @@ import { CreateGrupoDto } from '../dto/create-grupo.dto';
 @Controller('api/grupos')
 @UseGuards(JwtAuthGuard)
 export class GrupoController {
+
+  /**
+   * Inyecta el servicio de grupos
+   * @param grupoService Servicio que contiene la logica de negocio de Grupos
+   */
   constructor(private readonly grupoService: GrupoService) {}
 
+  /**
+   * Crea un grupo
+   * @param dto el DTO definido para la creacion de una review
+   * @param req El objeto de la request de HTTP
+   * @returns El nuevo grupo
+   */
   @Post('create')
   createGroup(@Body() dto: CreateGrupoDto, @Request() req) {
     const userId = req.user['id'];
     return this.grupoService.create(dto.nombre, userId, dto.descripcion);
   }
 
+  /**
+   * Une a un usuario a un grupo 
+   * @param grupoId ID del grupo al cual el usuario se va a unir
+   * @param req El objeto de la request de HTTP
+   * @returns Confirmacion de si el usuario se pudo unir al grupo correctamente
+   */
   @Post(':id/join')
   joinGroup(@Param('id', ParseIntPipe) grupoId: number, @Request() req) {
     const userId = req.user['id'];
     return this.grupoService.join(grupoId, userId);
   }
 
+  /**
+   * Devuelve todos los grupos
+   * @returns 
+   */
   @Get()
   getGroups() {
     return this.grupoService.getAll();
   }
 
+  /**
+   * Obtiene a los usuarios de un grupo en especifico
+   * @param grupoId ID del grupo del cual buscar los usuarios
+   * @returns Usuarios Obtenidos
+   */
   @Get(':id/members')
   getMembersByGroup(@Param('id', ParseIntPipe) grupoId: number) {
     return this.grupoService.getMembers(grupoId);
