@@ -7,12 +7,26 @@ import { MembresiaGrupo } from '../entities/membresiaGrupo.entity';
 
 @Injectable()
 export class GrupoService {
+
+  /**
+   * Inyecta los repositorios
+   * @param grupoRepo Repositorio de los Grupos
+   * @param userRepo Repositorio de los Users
+   * @param membresiaGrupoRepo Relacion entre los Users y los Grupos
+   */
   constructor(
     @InjectRepository(Grupo) private grupoRepo: Repository<Grupo>,
     @InjectRepository(User) private userRepo: Repository<User>,
     @InjectRepository(MembresiaGrupo) private membresiaGrupoRepo: Repository<MembresiaGrupo>,
   ) {}
 
+  /**
+   * Logica para la creacion de un grupo
+   * @param nombre Nombre del Grupo
+   * @param userId ID del creador del grupo, quien automaticamente se convierte en lider
+   * @param descripcion Descripcion del grupo
+   * @returns Promesa con la creacion del grupo
+   */
   async create(nombre: string, userId: number, descripcion?: string) {
   const user = await this.userRepo.findOneByOrFail({ id: userId });
 
@@ -30,6 +44,12 @@ export class GrupoService {
   return grupo;
 }
 
+/**
+ * Logica para unir a un miembro a un grupo
+ * @param grupoId ID del grupo al cual se une el usuario
+ * @param userId ID del usuario que se quiere unir al grupo
+ * @returns Mensaje de confirmacion de unirse al grupo, en caso de que el proceso no falle
+ */
 async join(grupoId: number, userId: number) {
   const grupo = await this.grupoRepo.findOneByOrFail({ id: grupoId });
   const user = await this.userRepo.findOneByOrFail({ id: userId });
@@ -51,10 +71,19 @@ async join(grupoId: number, userId: number) {
   return { mensaje: 'Te uniste al grupo correctamente' };
 }
 
+/**
+ * Obtiene todos los grupos
+ * @returns Promesa con todos los grupos
+ */
 async getAll() {
   return this.grupoRepo.find();
 }
 
+/**
+ * Logica para obtener todos los miembros de un grupo en especifico
+ * @param grupoId ID del grupo cuyos miembros se quieren obtener
+ * @returns Lista de todos los usuarios de un grupo junto con su rol en el mismo
+ */
 async getMembers(grupoId: number) {
   const grupo = await this.grupoRepo.findOne({
     where: { id: grupoId },
