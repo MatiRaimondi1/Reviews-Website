@@ -5,7 +5,7 @@ import { User } from '../entities/user.entity';
 import { Repository } from 'typeorm';
 
 /**
- * Servicio encargado de gestionar las operaciones relacionadas con las películas.
+ * Servicio encargado de gestionar las operaciones relacionadas con los usuarios
  */
 @Injectable()
 export class UsersService {

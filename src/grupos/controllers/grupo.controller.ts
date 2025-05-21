@@ -3,6 +3,9 @@ import { GrupoService } from '../services/grupo.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CreateGrupoDto } from '../dto/create-grupo.dto';
 
+/**
+ * Controlador encargado de manejar las requests relativas a los grupos
+ */
 @Controller('api/grupos')
 @UseGuards(JwtAuthGuard)
 export class GrupoController {
