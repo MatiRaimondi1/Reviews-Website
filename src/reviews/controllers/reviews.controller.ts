@@ -9,6 +9,11 @@ import { Role } from "src/auth/decorators/role.decorator";
  */
 @Controller('api/reviews')
 export class ReviewsController {
+
+   /**
+   * Inyecta el servicio de Reviews
+   * @param reviewsService Servicio que contiene la logica de negocio de Reviews
+   */
     constructor(private readonly reviewsService: ReviewsService) {}
 
     /**
