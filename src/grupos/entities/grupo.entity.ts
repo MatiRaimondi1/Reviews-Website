@@ -1,6 +1,7 @@
-import { Column, CreateDateColumn, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinColumn, JoinTable, ManyToMany, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { MembresiaGrupo } from "./membresiaGrupo.entity";
 import { Review } from "src/reviews/entities/review.entity";
+import { Reunion } from "src/reuniones/entities/reunion.entity";
 
 @Entity()
 export class Grupo {
@@ -21,4 +22,11 @@ export class Grupo {
 
     @OneToMany(() => Review, review => review.grupo)
     reviews: Review[];
+
+    @Column({ nullable: true })
+    reunionId: number;
+
+    @OneToOne(() => Reunion, reunion => reunion.grupo, { eager: false, onDelete: 'CASCADE' })
+    @JoinColumn({ name: 'reunionId '})
+    reunion: Reunion;
 }
