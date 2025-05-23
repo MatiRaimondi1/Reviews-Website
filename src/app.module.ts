@@ -9,6 +9,7 @@ import { ConfigModule } from '@nestjs/config';
 import { ReviewsModule } from './reviews/reviews.module';
 import { GrupoModule } from './grupos/grupo.module';
 import { ComentariosModule } from './comentarios/comentarios.module';
+import { ReunionModule } from './reuniones/reuniones.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { ComentariosModule } from './comentarios/comentarios.module';
     ReviewsModule,
     GrupoModule,
     ComentariosModule,
+    ReunionModule,
   ],
   controllers: [],
   providers: [],
