@@ -67,12 +67,10 @@ describe ('UsersService', () => {
         };
         const result = { id:1, ...dto};
         
-        repo.create.mockReturnValue(result as any);
         repo.save.mockResolvedValue(result as any);
 
         const response = await service.create(dto)
         expect(response).toEqual(result);
-        expect(repo.save).toHaveBeenCalledWith(result);
-        expect(repo.create).toHaveBeenCalledWith(dto);
+        expect(repo.save).toHaveBeenCalledWith(dto);
     })
 })
