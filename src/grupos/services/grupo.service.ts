@@ -5,6 +5,10 @@ import { Grupo } from '../entities/grupo.entity';
 import { User } from 'src/users/entities/user.entity';
 import { MembresiaGrupo } from '../entities/membresiaGrupo.entity';
 
+
+/**
+ * Servicio encargado de gestionar las operaciones relacionadas con los grupos
+ */
 @Injectable()
 export class GrupoService {
 
