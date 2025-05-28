@@ -59,16 +59,17 @@ describe('PeliculasService', () => {
             genero: 'Drama',
             fechaEstreno: new Date(),
             duracion: 120,
-            urlImagen: 'imagen.jpg',
             calificacion: 4.5,
         };
-        const pelicula = { id: 1, ...dto };
+        const urlImagen = 'imagen.jpg'
+        const dataConImagen = { ...dto, urlImagen };
+        const pelicula = { id: 1, ...dataConImagen };
 
         repo.create.mockReturnValue(pelicula as any);
         repo.save.mockResolvedValue(pelicula as any);
 
-        const result = await service.create(dto);
-        expect(repo.create).toHaveBeenCalledWith(dto);
+        const result = await service.create(dto, urlImagen);
+        expect(repo.create).toHaveBeenCalledWith(dataConImagen);
         expect(repo.save).toHaveBeenCalledWith(pelicula);
         expect(result).toEqual(pelicula);
     });

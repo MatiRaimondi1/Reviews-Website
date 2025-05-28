@@ -70,16 +70,18 @@ describe('PeliculasController', () => {
                 genero: 'Drama',
                 fechaEstreno: new Date(),
                 duracion: 120,
-                urlImagen: 'url.jpg',
                 calificacion: 4.5,
             };
 
-            const created = { id: 1, ...dto };
+            const file = { filename: 'imagen-subida.jpg' } as Express.Multer.File;
+            const urlEsperada = `/uploads/peliculas/${file.filename}`;
+
+            const created = { id: 1, ...dto, urlImagen: urlEsperada };
             mockPeliculasService.create.mockResolvedValue(created);
 
-            const response = await controller.create(dto);
+            const response = await controller.create(dto, file);
 
-            expect(mockPeliculasService.create).toHaveBeenCalledWith(dto);
+            expect(mockPeliculasService.create).toHaveBeenCalledWith(dto, urlEsperada);
             expect(response).toEqual(created);
         });
     });
