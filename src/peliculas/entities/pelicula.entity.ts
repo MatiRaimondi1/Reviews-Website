@@ -21,8 +21,8 @@ export class Pelicula {
     @Column({ nullable: false })
     duracion: number;
 
-    @Column()
-    urlImagen: string;
+    @Column({ nullable: true })
+    urlImagen?: string;
 
     @Column({ nullable: false })
     calificacion: number;

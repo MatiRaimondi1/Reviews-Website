@@ -37,6 +37,23 @@ export class PeliculasService {
     }
 
     /**
+     * Obtiene una lista paginada de peliculas por genero.
+     * 
+     * @param nombreGenero Nombre del genero de la pelicula.
+     * @param page Número de página (comienza en 0). Por defecto, es 0.
+     * @returns Promesa con una lista de hasta 10 peliculas por genero.
+     */
+    async findByGenero(nombreGenero: string, page = 0) {
+        const limit = 10;
+        const offset = page * limit;
+        return this.peliculasRepo.find({
+            where: { genero: nombreGenero },
+            skip: offset,
+            take: limit,
+        });
+    }
+
+    /**
      * Busca una película por su ID.
      * 
      * @param id Identificador de la película.
@@ -49,11 +66,14 @@ export class PeliculasService {
     /**
      * Crea una nueva película en la base de datos.
      * 
-     * @param body DTO con los datos necesarios para crear una película.
+     * @param dto DTO con los datos necesarios para crear una película.
      * @returns Promesa con la película creada.
      */
-    async create(body: CreatePeliculaDto) {
-        const newPelicula = this.peliculasRepo.create(body);
+    async create(dto: CreatePeliculaDto, urlImagen: string | null) {
+        const newPelicula = this.peliculasRepo.create({
+            ...dto,
+            urlImagen: urlImagen ?? undefined,
+        });
         return this.peliculasRepo.save(newPelicula);
     }
 

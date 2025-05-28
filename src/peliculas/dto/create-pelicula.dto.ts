@@ -1,3 +1,4 @@
+import { Type } from "class-transformer";
 import { IsDate, IsNumber, IsString } from "class-validator";
 
 export class CreatePeliculaDto {
@@ -13,12 +14,11 @@ export class CreatePeliculaDto {
     @IsString()
     fechaEstreno: Date;
 
+    @Type(() => Number)
     @IsNumber()
     duracion: number;
 
-    @IsString()
-    urlImagen: string;
-
+    @Type(() => Number)
     @IsNumber()
     calificacion: number;
 }
