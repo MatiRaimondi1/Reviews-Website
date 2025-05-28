@@ -55,7 +55,7 @@ export class ReviewsController {
      * 
      * @param id ID de la review a borrar
      * @param req El objeto de la request de HTTP
-     * @returns La promesa de la eliminacion de la review
+     * @returns 'true' si la eliminacion fue exitosa
      */
     @UseGuards(JwtAuthGuard)
     @Role('user', 'admin')
