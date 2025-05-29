@@ -22,7 +22,7 @@ export class GrupoController {
    * @param req El objeto de la request de HTTP
    * @returns El nuevo grupo
    */
-  @Post('create')
+  @Post()
   createGroup(@Body() dto: CreateGrupoDto, @Request() req) {
     const userId = req.user['id'];
     return this.grupoService.create(dto.nombre, userId, dto.descripcion);
@@ -34,7 +34,7 @@ export class GrupoController {
    * @param req El objeto de la request de HTTP
    * @returns Confirmacion de si el usuario se pudo unir al grupo correctamente
    */
-  @Post(':id/join')
+  @Post(':id')
   joinGroup(@Param('id', ParseIntPipe) grupoId: number, @Request() req) {
     const userId = req.user['id'];
     return this.grupoService.join(grupoId, userId);
@@ -47,6 +47,16 @@ export class GrupoController {
   @Get()
   getGroups() {
     return this.grupoService.getAll();
+  }
+
+  /**
+   * Devuelve el grupo con el id especificado
+   * @param grupoId Id del grupo a buscar
+   * @returns Grupo con el id especificado
+   */
+  @Get(':id')
+  getGroupById(@Param('id', ParseIntPipe) grupoId: number) {
+    return this.grupoService.getOneById(grupoId);
   }
 
   /**

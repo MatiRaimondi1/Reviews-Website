@@ -15,7 +15,7 @@ export class Pelicula {
     @Column({ nullable: false })
     genero: string;
 
-    @Column({ type: 'date' })
+    @Column({ type: 'date', nullable: false })
     fechaEstreno: Date;
 
     @Column({ nullable: false })

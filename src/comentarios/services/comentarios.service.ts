@@ -30,12 +30,24 @@ export class ComentariosService {
     }
 
     async findByReview(reviewId: number) {
-        return this.comentariosRepo.find({
+        const review = await this.reviewsRepo.findOneBy({ id: reviewId });
+        
+        if (!review) {
+            throw new NotFoundException('No se encontro una review con este id.')
+        }
+
+        const comentarios = await this.comentariosRepo.find({
             where: {
                 review: { id: reviewId }
             },
             relations: ['user'],
         });
+        
+        if (!comentarios || comentarios.length === 0) {
+            throw new NotFoundException('No se encontraron comentarios para esta review.')
+        }
+
+        return comentarios;
     }
 
     async remove(comentarioId: number, userId: number) {
@@ -59,6 +71,7 @@ export class ComentariosService {
             throw new ForbiddenException("No tienes permiso para eliminar este comentario.");
         }
 
-        return this.comentariosRepo.remove(comentario)
+        this.comentariosRepo.remove(comentario)
+        return { success: true, message: 'Comentario eliminado correctamente.' };
     }
 }

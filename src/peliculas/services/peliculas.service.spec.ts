@@ -13,6 +13,7 @@ const mockRepo = () => ({
     save: jest.fn(),
     merge: jest.fn(),
     delete: jest.fn(),
+    findOne: jest.fn(),
 });
 
 describe('PeliculasService', () => {
@@ -84,7 +85,8 @@ describe('PeliculasService', () => {
         repo.delete.mockResolvedValue({ affected: 1 } as any);
 
         const result = await service.delete(1);
+        const expectedResult = {"message": "Película eliminada correctamente.", "success": true}
         expect(repo.delete).toHaveBeenCalledWith(1);
-        expect(result).toBe(true);
+        expect(result).toStrictEqual(expectedResult);
     });
 });

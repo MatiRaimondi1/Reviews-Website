@@ -1,7 +1,6 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-
 import { Pelicula } from '../entities/pelicula.entity';
 import { CreatePeliculaDto } from '../dto/create-pelicula.dto';
 import { UpdatePeliculaDto } from '../dto/update-pelicula.dto';
@@ -11,15 +10,15 @@ import { UpdatePeliculaDto } from '../dto/update-pelicula.dto';
  */
 @Injectable()
 export class PeliculasService {
-    
+
     /**
      * Inyecta el repositorio de películas.
      * @param peliculasRepo Repositorio de la entidad `Pelicula`.
      */
     constructor(
-        @InjectRepository(Pelicula) 
+        @InjectRepository(Pelicula)
         private peliculasRepo: Repository<Pelicula>,
-    ) {}
+    ) { }
 
     /**
      * Obtiene una lista paginada de películas.
@@ -30,10 +29,16 @@ export class PeliculasService {
     async findAll(page = 0) {
         const limit = 10;
         const offset = page * limit;
-        return this.peliculasRepo.find({
+        const peliculas = await this.peliculasRepo.find({
             skip: offset,
             take: limit,
         });
+
+        if (!peliculas || peliculas.length === 0) {
+            throw new NotFoundException(`No se encontraron películas.`);
+        }
+
+        return peliculas;
     }
 
     /**
@@ -44,37 +49,61 @@ export class PeliculasService {
      * @returns Promesa con una lista de hasta 10 peliculas por genero.
      */
     async findByGenero(nombreGenero: string, page = 0) {
+        if (!nombreGenero || nombreGenero.trim() === '') {
+            throw new BadRequestException('El género no puede estar vacío.');
+        }
+
         const limit = 10;
         const offset = page * limit;
-        return this.peliculasRepo.find({
+        const peliculas = await this.peliculasRepo.find({
             where: { genero: nombreGenero },
             skip: offset,
             take: limit,
         });
+
+        if (!peliculas || peliculas.length === 0) {
+            throw new NotFoundException(`No se encontraron películas con el género '${nombreGenero}'.`);
+        }
+
+        return peliculas;
     }
 
     /**
      * Busca una película por su ID.
      * 
      * @param id Identificador de la película.
-     * @returns Promesa con la película encontrada o `null` si no existe.
+     * @returns Promesa con la película encontrada.
      */
     async findOne(id: number) {
-        return this.peliculasRepo.findOneBy({ id });
+        const pelicula = await this.peliculasRepo.findOneBy({ id });
+
+        if (!pelicula) {
+            throw new NotFoundException(`No se encontró una película con el ID ${id}.`);
+        }
+
+        return pelicula;
     }
 
     /**
      * Crea una nueva película en la base de datos.
      * 
      * @param dto DTO con los datos necesarios para crear una película.
+     * @param urlImagen URL de la imagen de la pelicula.
      * @returns Promesa con la película creada.
      */
     async create(dto: CreatePeliculaDto, urlImagen: string | null) {
+        const existe = await this.peliculasRepo.findOne({ where: { nombre: dto.nombre } });
+
+        if (existe) {
+            throw new ConflictException('Ya existe una pelicula con ese nombre.');
+        }
+
         const newPelicula = this.peliculasRepo.create({
             ...dto,
             urlImagen: urlImagen ?? undefined,
         });
-        return this.peliculasRepo.save(newPelicula);
+
+        return await this.peliculasRepo.save(newPelicula);
     }
 
     /**
@@ -82,16 +111,15 @@ export class PeliculasService {
      * 
      * @param id ID de la película a actualizar.
      * @param body DTO con los campos a modificar.
-     * @throws `NotFoundException` si la película no existe.
      * @returns Promesa con la película actualizada.
      */
     async update(id: number, body: UpdatePeliculaDto) {
         const pelicula = await this.peliculasRepo.findOneBy({ id });
-        
+
         if (!pelicula) {
             throw new NotFoundException(`Pelicula con ID ${id} no encontrada`);
         }
-        
+
         this.peliculasRepo.merge(pelicula, body);
         return this.peliculasRepo.save(pelicula);
     }
@@ -103,7 +131,12 @@ export class PeliculasService {
      * @returns Promesa que resuelve en `true` si la operación fue exitosa.
      */
     async delete(id: number) {
-        await this.peliculasRepo.delete(id);
-        return true;
+        const result = await this.peliculasRepo.delete(id);
+
+        if (result.affected === 0) {
+            throw new NotFoundException(`No se encontró una película con el ID ${id}.`);
+        }
+
+        return { success: true, message: 'Película eliminada correctamente.' };
     }
 }

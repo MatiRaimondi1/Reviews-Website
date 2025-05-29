@@ -22,7 +22,7 @@ export class ReunionService {
         @InjectRepository(Reunion) private reunionRepo: Repository<Reunion>,
         @InjectRepository(User) private userRepo: Repository<User>,
         @InjectRepository(Grupo) private grupoRepo: Repository<Grupo>,
-    ) {}
+    ) { }
 
     /**
      * Crea una reunion
@@ -31,13 +31,7 @@ export class ReunionService {
      * @returns Promesa con la creacion de la reunion
      */
     async create(userId: number, dto: CreateReunionDto) {
-        const user = await this.findUserWithGroups(userId);
-        
-        const relacion = user.gruposRelacionados.find(rel => rel.rol === 'lider');
-        if (!relacion) {
-            throw new ForbiddenException("Solo el líder del grupo puede crear una reunión.");
-        }
-
+        const relacion = await this.getLiderRelacion(userId);
         const grupo = relacion.grupo;
 
         const existingReunion = await this.reunionRepo.findOne({
@@ -61,22 +55,16 @@ export class ReunionService {
      * @param reunionId ID de la reunion a borrar
      * @returns Mensaje de confirmacion de la eliminacion de la reunion
      */
-    async delete(userId: number, reunionId: number) {
-        const user = await this.findUserWithGroups(userId);
+    async delete(userId: number) {
+        const relacion = await this.getLiderRelacion(userId);
 
         const reunion = await this.reunionRepo.findOne({
-            where: { id: reunionId },
+            where: { grupo: { id: relacion.grupo.id } },
             relations: ['grupo'],
         });
-        if (!reunion) {
-            throw new BadRequestException("Reunión no encontrada.")
-        }
 
-        const relacion = user.gruposRelacionados.find(
-            rel => rel.rol === 'lider' && rel.grupo.id === reunion.grupo.id
-        );
-        if (!relacion) {
-            throw new ForbiddenException('Solo el líder del grupo puede eliminar la reunión.');
+        if (!reunion) {
+            throw new BadRequestException("No se encontraron reuniones para eliminar.");
         }
 
         await this.reunionRepo.remove(reunion);
@@ -86,25 +74,18 @@ export class ReunionService {
     /**
      * Obtiene la reunion vigente de un grupo
      * @param userId Usuario que hace el pedido
-     * @param grupoId ID del grupo cuya reunion se quiere obtener
      * @returns Promesa de la reunion obtenida
      */
-    async getReunionByGrupo(userId: number, grupoId: number) {
-        const user = await this.findUserWithGroups(userId);
-
-        const pertenece = user.gruposRelacionados.some(
-            rel => rel.grupo.id === grupoId
-        );
-        if (!pertenece) {
-            throw new ForbiddenException('No tienes permiso para ver la reunión de este grupo.');
-        }
+    async getReunion(userId: number) {
+        const relacion = await this.getRelacionUsuario(userId);
 
         const reunion = await this.reunionRepo.findOne({
-            where: { grupo: { id: grupoId } },
+            where: { grupo: { id: relacion.grupo.id } },
             relations: ['grupo'],
         });
+
         if (!reunion) {
-            throw new NotFoundException('No se encontró reunión para este grupo.');
+            throw new NotFoundException('No se encontró reunión para tu grupo.');
         }
 
         return reunion;
@@ -126,5 +107,39 @@ export class ReunionService {
         }
 
         return user;
+    }
+
+    /**
+    * Obtiene la relación de grupo donde el usuario tiene el rol de líder.
+    *
+    * @param userId - ID del usuario que se desea verificar.
+    * @returns La relación del usuario con el grupo donde es líder.
+    */
+    private async getLiderRelacion(userId: number) {
+        const user = await this.findUserWithGroups(userId);
+        const relacion = user.gruposRelacionados.find(rel => rel.rol === 'lider');
+
+        if (!relacion) {
+            throw new ForbiddenException('Solo el líder del grupo puede realizar esta acción.');
+        }
+
+        return relacion;
+    }
+
+    /**
+     * Obtiene la primera relación del usuario con algún grupo, sin importar el rol.
+    *
+    * @param userId - ID del usuario que se desea verificar.
+    * @returns La primera relación del usuario con un grupo.
+    */
+    private async getRelacionUsuario(userId: number) {
+        const user = await this.findUserWithGroups(userId);
+        const relacion = user.gruposRelacionados[0];
+
+        if (!relacion) {
+            throw new ForbiddenException('No perteneces a ningún grupo.');
+        }
+
+        return relacion;
     }
 }

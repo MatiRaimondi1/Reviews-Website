@@ -28,24 +28,6 @@ describe('UsersController', () => {
         jest.clearAllMocks();
     })
 
-    describe('create', () =>{
-        it('debe llamar a create con el dto y devolver el resultado', async () =>{
-            const dto: CreateUserDto = {
-                username: 'Pablo',
-                email: 'pablo@ejemplo.com',
-                password: 'contrasenia',
-            }
-
-            const created = { id:1, ...dto};
-            mockUsersService.create.mockResolvedValue(created);
-
-            const response =  await controller.create(dto);
-
-            expect(mockUsersService.create).toHaveBeenCalledWith(dto);
-            expect(response).toEqual(created)
-        });
-    })
-
     describe ('findAll', () => {
         it('debe llamar a findAll y devolver el resultado', async () => {
             

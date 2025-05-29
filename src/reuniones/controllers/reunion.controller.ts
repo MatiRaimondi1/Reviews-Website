@@ -6,7 +6,6 @@ import { CreateReunionDto } from "../dto/create-reunion.dto";
 /**
  * Controlador encargado de manejar las requests relativas a las reuniones
  */
-
 @Controller('api/reuniones')
 @UseGuards(JwtAuthGuard)
 export class ReunionController {
@@ -30,26 +29,25 @@ export class ReunionController {
 
     /**
      * Borra una reunion
-     * @param id ID de la reunion a borrar
      * @param req el objeto de la request de HTML
      * @returns Mensaje con la confirmacion de la eliminacion de la reunion
      */
-    @Delete(':id')
-    async deleteReunion(@Param('id', ParseIntPipe) id: number, @Request() req) {
+    @Delete()
+    async deleteReunion(@Request() req) {
         const userId = req.user['id'];
-        return this.reunionService.delete(userId, id)
+        return this.reunionService.delete(userId)
     }
 
     /**
-     * Obtiene una reunion en base a su ID
-     * @param id ID de la reunion a buscar
+     * Obtiene una reunion en base a la ID de su grpo
+     * @param id ID del grupo cuya reunion se quiere obtener
      * @param req el objeto de la request de HTML
      * @returns La reunion encontrada, si se encuentra
      */
-    @Get(':id')
-    async getReunion(@Param('id', ParseIntPipe) id: number, @Request() req) {
+    @Get()
+    async getReunion(@Request() req) {
         const userId = req.user['id'];
-        return this.reunionService.getReunionByGrupo(userId, id);
+        return this.reunionService.getReunion(userId);
     }
 
 }

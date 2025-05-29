@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../entities/user.entity';
@@ -31,10 +31,19 @@ export class UsersService {
   /**
    * Busca un usuario por us email
    * @param email Email del usuario a buscar
-   * @returns Promesa con el usuario encontrado o 'null' si no se encuentra
+   * @returns Promesa con el usuario encontrado
    */
   async findOneByEmail(email: string) {
     return this.userRepo.findOneBy({ email });
+  }
+
+  /**
+   * Busca un usuario por nombre de usuario
+   * @param username Nombre del usuario a buscar
+   * @returns Promesa con el usuario encontrado
+   */
+  async findOneByUsername(username: string) {
+    return this.userRepo.findOneBy({ username })
   }
 
   /**
@@ -42,15 +51,23 @@ export class UsersService {
    * @returns Promesa con todos los usuarios
    */
   async findAll() {
-    return this.userRepo.find();
+    const usuarios = await this.userRepo.find()
+    if (!usuarios || usuarios.length === 0) {
+      throw new NotFoundException('No se encontraron usuarios.')
+    }
+    return usuarios;
   }
 
   /**
    * Busca a un usuario en especifico mediante su ID
    * @param id ID del usuario a buscar
-   * @returns Promesa con el usuario encontrado o 'null' si no se encuentra
+   * @returns Promesa con el usuario encontrado
    */
   async findOne(id: number) {
-    return this.userRepo.findOneBy({ id });
+    const usuario = await this.userRepo.findOneBy({ id });
+    if (!usuario) {
+      throw new NotFoundException('No se encontro un usuario con ese ID.')
+    }
+    return usuario;
   }
 }

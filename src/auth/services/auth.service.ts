@@ -15,16 +15,16 @@ export class AuthService {
     ) {}
 
     async register({ username, email, password }: RegisterDto) {
-        const user = await this.usersService.findOneByEmail(email);
+        const user_email = await this.usersService.findOneByEmail(email);
+        const user_username = await this.usersService.findOneByUsername(username)
         
-        if (user) {
-            throw new BadRequestException('User already exists');
-        
+        if (user_username || user_email) {
+            throw new BadRequestException('Ya existe un usuario con ese email o nombre.');
         }
         
         return await this.usersService.create({ username,
-        email,
-        password: await bcrypt.hash(password, 10)
+            email,
+            password: await bcrypt.hash(password, 10)
         });
     }
 

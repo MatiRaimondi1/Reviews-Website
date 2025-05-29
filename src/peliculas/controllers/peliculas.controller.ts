@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Post, Body, Put, Delete, UseGuards, Query, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Controller, Get, Param, Post, Body, Put, Delete, UseGuards, Query, UseInterceptors, UploadedFile, ParseIntPipe } from '@nestjs/common';
 import { PeliculasService } from '../services/peliculas.service';
 import { CreatePeliculaDto } from '../dto/create-pelicula.dto';
 import { UpdatePeliculaDto } from '../dto/update-pelicula.dto';
@@ -7,6 +7,7 @@ import { Role } from 'src/auth/decorators/role.decorator';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { extname } from 'path';
 import { diskStorage } from 'multer';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
 
 /**
  * Controlador que maneja las rutas relacionadas con películas.
@@ -52,7 +53,7 @@ export class PeliculasController {
     * @returns Película encontrada.
     */
     @Get(':id')
-    findOne(@Param('id') id: number) {
+    findOne(@Param('id', ParseIntPipe) id: number) {
         return this.peliculasService.findOne(id);
     }
 
@@ -60,10 +61,11 @@ export class PeliculasController {
      * Crea una nueva película.
      * Solo accesible por usuarios con rol "admin".
      * 
-     * @param body Datos para crear la película.
+     * @param dto Datos para crear la película.
+     * @param imagen Archivo con formato de imagen (Opcional).
      * @returns Película creada.
      */
-    @UseGuards(JwtAuthGuard)
+    @UseGuards(JwtAuthGuard, RolesGuard)
     @Role('admin')
     @Post()
     @UseInterceptors(FileInterceptor('imagen', {
@@ -88,7 +90,7 @@ export class PeliculasController {
      * @param body Datos nuevos de la película.
      * @returns Película actualizada.
      */
-    @UseGuards(JwtAuthGuard)
+    @UseGuards(JwtAuthGuard, RolesGuard)
     @Role('admin')
     @Put(':id')
     update(@Param('id') id: number, @Body() body: UpdatePeliculaDto) {
@@ -100,9 +102,9 @@ export class PeliculasController {
      * Solo accesible por usuarios con rol "admin".
      * 
      * @param id ID de la película a eliminar.
-     * @returns `true` si la operación fue exitosa.
+     * @returns resultado de la operación.
      */
-    @UseGuards(JwtAuthGuard)
+    @UseGuards(JwtAuthGuard, RolesGuard)
     @Role('admin')
     @Delete(':id')
     delete(@Param('id') id: number) {
