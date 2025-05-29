@@ -52,7 +52,6 @@ export class ReunionService {
     /**
      * Borra una reunion
      * @param userId ID del usuario que borra la reunion
-     * @param reunionId ID de la reunion a borrar
      * @returns Mensaje de confirmacion de la eliminacion de la reunion
      */
     async delete(userId: number) {
