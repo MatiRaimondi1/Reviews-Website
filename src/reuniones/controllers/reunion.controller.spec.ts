@@ -10,6 +10,7 @@ describe('UsersController', () => {
         create: jest.fn(),
         delete: jest.fn(),
         getReunionByGrupo: jest.fn(),
+        getReunion: jest.fn(),
     };
 
     beforeEach(async () => {
@@ -53,8 +54,8 @@ describe('UsersController', () => {
             const req = {
                 user: {id: 2},
             };
-            const result = await controller.deleteReunion(1, req);
-            expect(mockReunionService.delete).toHaveBeenCalledWith(2, 1);
+            const result = await controller.deleteReunion(req);
+            expect(mockReunionService.delete).toHaveBeenCalledWith(2);
             expect(result).toEqual({ message: 'Reunión eliminada correctamente.' });
         })
     })
@@ -64,10 +65,10 @@ describe('UsersController', () => {
             const reunion = {id: 1, fecha: new Date(), link: 'link.com', grupoId: 3};
             const req = {user: {id: 2},};
 
-            mockReunionService.getReunionByGrupo.mockResolvedValue(reunion);
-            const result = await controller.getReunion(3, req);
+            mockReunionService.getReunion.mockResolvedValue(reunion);
+            const result = await controller.getReunion(req);
 
-            expect(mockReunionService.getReunionByGrupo).toHaveBeenCalledWith(2, 3);
+            expect(mockReunionService.getReunion).toHaveBeenCalledWith(req.user.id);
             expect(result).toEqual(reunion);
         })
     })
