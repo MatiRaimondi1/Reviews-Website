@@ -41,8 +41,8 @@ export class ReunionController {
     }
 
     /**
-     * Obtiene una reunion en base a su ID
-     * @param id ID de la reunion a buscar
+     * Obtiene una reunion en base a la ID de su grpo
+     * @param id ID del grupo cuya reunion se quiere obtener
      * @param req el objeto de la request de HTML
      * @returns La reunion encontrada, si se encuentra
      */
