@@ -26,7 +26,7 @@ export class User {
     @Column({ default: 1 })
     nivel: number;
 
-    @Column({ default: "./img/defaultUser.png" })
+    @Column({ default: "/uploads/defaultUser.jpg" })
     urlImagen: string;
 
     @OneToMany(() => Review, review => review.user)

@@ -17,7 +17,7 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
-  ) {}
+  ) { }
 
   /**
    * Crea un usuario
@@ -69,5 +69,20 @@ export class UsersService {
       throw new NotFoundException('No se encontro un usuario con ese ID.')
     }
     return usuario;
+  }
+
+  /**
+   * Cambia la imagen de perfil del usuario
+   * 
+   * @param userId ID del usuario
+   * @param imageUrl URL de la imagen ed perfil
+   * @returns Mensaje de exito
+   */
+  async updateProfileImage(userId: number, imageUrl: string) {
+    const user = await this.userRepo.findOneBy({ id: userId });
+    if (!user) throw new NotFoundException('Usuario no encontrado');
+
+    user.urlImagen = imageUrl;
+    return { "message": "Imagen de perfil cambiada correctamente." }
   }
 }
