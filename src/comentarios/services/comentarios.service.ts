@@ -6,14 +6,30 @@ import { Repository } from "typeorm";
 import { Review } from "src/reviews/entities/review.entity";
 import { User } from "src/users/entities/user.entity";
 
+/**
+ * Servicio encargado de manejar las operaciones relacionadas con los comentarios
+ */
 @Injectable()
 export class ComentariosService {
+    /**
+     * Inyecta los repositorios
+     * @param comentariosRepo Repositorio de comentarios
+     * @param reviewsRepo Repositorio de reviews
+     * @param usersRepo Repositorio de usuarios
+     */
     constructor(
         @InjectRepository(Comentario) private readonly comentariosRepo: Repository<Comentario>,
         @InjectRepository(Review) private readonly reviewsRepo: Repository<Review>,
         @InjectRepository(User) private readonly usersRepo: Repository<User>,
     ) {}
 
+    /**
+     * Crea un comentario
+     * @param reviewId ID de la review en la que se comenta
+     * @param userId ID del usuario que realiza el comentario
+     * @param dto el DTO establecido para la creacion de un comentario
+     * @returns Promesa de la creacion del comentario
+     */
     async create(reviewId: number, userId: number, dto: CreateComentarioDto) {
         const review = await this.reviewsRepo.findOneBy({ id: reviewId });
         const user = await this.usersRepo.findOneBy({ id: userId });
@@ -29,6 +45,11 @@ export class ComentariosService {
         return this.comentariosRepo.save(comentario);
     }
 
+    /**
+     * Obtiene todos los comentarios de una review
+     * @param reviewId ID de la review cuyos comentarios se quieren obtener
+     * @returns Promesa con los comentarios obtenidos
+     */
     async findByReview(reviewId: number) {
         const review = await this.reviewsRepo.findOneBy({ id: reviewId });
         
@@ -50,6 +71,12 @@ export class ComentariosService {
         return comentarios;
     }
 
+    /**
+     * Borra un comentario
+     * @param comentarioId ID del comentario a borrar 
+     * @param userId ID del usuario que borra un comentario
+     * @returns Confirmacion de la eliminacion del comentario
+     */
     async remove(comentarioId: number, userId: number) {
         const comentario = await this.comentariosRepo.findOne({
             where: { id: comentarioId },
