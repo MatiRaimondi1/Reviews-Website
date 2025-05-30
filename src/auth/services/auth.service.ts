@@ -5,14 +5,29 @@ import * as bcrypt from 'bcrypt';
 import { LoginDto } from '../dto/login.dto';
 import { JwtService } from '@nestjs/jwt';
 
+/**
+ * Servicio encargado de gestionar las operaciones relacionadas a la autenticación de usuarios
+ */
 @Injectable()
 export class AuthService {
-
+    
+    /**
+     * Constructor del serivicio de autenticación
+     * 
+     * @param usersService Importación del servicio de usuarios
+     * @param jwtService Importación del servicio JWT
+     */
     constructor(
         private readonly usersService: UsersService,
         private readonly jwtService: JwtService,
     ) {}
 
+    /**
+    * Registra un nuevo usuario en el sistema.
+    *
+    * @param dto DTO que contiene `username`, `email` y `password`.
+    * @returns El usuario creado.
+    */
     async register({ username, email, password }: RegisterDto) {
         const user_email = await this.usersService.findOneByEmail(email);
         const user_username = await this.usersService.findOneByUsername(username)
@@ -27,6 +42,12 @@ export class AuthService {
         });
     }
 
+    /**
+    * Autentica a un usuario con email y contraseña.
+    *
+    * @param dto - DTO que contiene `email` y `password`.
+    * @returns Un objeto con el token JWT y un mensaje de confirmación.
+    */
     async login({ email, password }: LoginDto) {
         const user = await this.usersService.findOneByEmail(email);
         if (!user) {
