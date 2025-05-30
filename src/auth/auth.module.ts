@@ -5,6 +5,7 @@ import { UsersModule } from 'src/users/users.module';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
   imports: [
@@ -18,6 +19,14 @@ import { JwtStrategy } from './strategies/jwt.strategy';
         secret: configService.get<string>('AUTH_SECRET'),
         signOptions: { expiresIn: '1d' },
       }),
+    }),
+    ThrottlerModule.forRoot({
+      throttlers: [
+        {
+          ttl: 60000,
+          limit: 5
+        },
+      ],
     }),
   ],
   controllers: [AuthController],
