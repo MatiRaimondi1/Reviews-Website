@@ -1,7 +1,6 @@
 import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from 'src/users/services/users.service';
 import { RegisterDto } from '../dto/register.dto';
-
 import * as bcrypt from 'bcrypt';
 import { LoginDto } from '../dto/login.dto';
 import { JwtService } from '@nestjs/jwt';
@@ -31,12 +30,12 @@ export class AuthService {
     async login({ email, password }: LoginDto) {
         const user = await this.usersService.findOneByEmail(email);
         if (!user) {
-            throw new UnauthorizedException('Wrong email.');
+            throw new UnauthorizedException('El email o la contraseña son incorrectos.');
         }
 
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
-            throw new UnauthorizedException('Wrong password.');
+            throw new UnauthorizedException('El email o la contraseña son incorrectos.');
         }
 
         const payload = { sub: user.id, role: user.rol };

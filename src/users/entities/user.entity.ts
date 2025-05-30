@@ -33,7 +33,7 @@ export class User {
     reviews: Review[];
 
     @DeleteDateColumn()
-    deletedAt: Date;
+    deletedAt: Date | null;
 
     @OneToMany(() => MembresiaGrupo, (mg) => mg.user)
     gruposRelacionados: MembresiaGrupo[];
