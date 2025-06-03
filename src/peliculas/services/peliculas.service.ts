@@ -1,6 +1,6 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Like, Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import { Pelicula } from '../entities/pelicula.entity';
 import { CreatePeliculaDto } from '../dto/create-pelicula.dto';
 import { UpdatePeliculaDto } from '../dto/update-pelicula.dto';
@@ -93,7 +93,7 @@ export class PeliculasService {
     async findByKey(key: string) {
         const peliculas = await this.peliculasRepo.find({
             where: {
-                nombre: Like(`%${key}%`),
+                nombre: ILike(`%${key}%`),
             },
             order: { nombre: 'ASC' },
         });
