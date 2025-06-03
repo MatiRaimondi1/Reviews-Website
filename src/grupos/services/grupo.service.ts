@@ -121,6 +121,19 @@ export class GrupoService {
     }));
   }
 
+  async countMembers(grupoId: number): Promise<number> {
+    const grupo = await this.grupoRepo.findOne({
+      where: { id: grupoId },
+      relations: ['usuariosRelacionados'],
+    });
+
+    if (!grupo) {
+      throw new NotFoundException('Grupo no encontrado');
+    }
+
+    return grupo.usuariosRelacionados.length;
+  }
+
   /**
   * Verifica si existe un usuario con el ID proporcionado.
   * 

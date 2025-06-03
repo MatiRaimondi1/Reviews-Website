@@ -21,7 +21,7 @@ export class ReviewsService {
         @InjectRepository(User) private usersRepo: Repository<User>,
         @InjectRepository(Pelicula) private peliculasRepo: Repository<Pelicula>,
         @InjectRepository(Grupo) private grupoRepo: Repository<Grupo>,
-    ) {}
+    ) { }
 
     /**
      * Logica de la creacion de una Review
@@ -68,10 +68,10 @@ export class ReviewsService {
             return this.reviewsRepo.save(review);
         } else {
             const existingReview = await this.reviewsRepo
-            .createQueryBuilder('review')
-            .where('review.userId = :userId', { userId })
-            .andWhere('review.peliculaId = :peliculaId', { peliculaId })
-            .getOne();
+                .createQueryBuilder('review')
+                .where('review.userId = :userId', { userId })
+                .andWhere('review.peliculaId = :peliculaId', { peliculaId })
+                .getOne();
             if (existingReview) {
                 throw new ConflictException("Ya existe una review para esta pelicula por este usuario.");
             }
@@ -99,6 +99,38 @@ export class ReviewsService {
             },
             relations: ['user'],
         });
+    }
+
+    async findByUsuario(userId: number) {
+        const reviews = await this.reviewsRepo.find({
+            where: {
+                user: { id: userId },
+            },
+            relations: ['pelicula'],
+            order: { id: 'DESC' },
+        });
+
+        if (!reviews || reviews.length === 0) {
+            throw new NotFoundException("Este usuario no hizo ninguna review.")
+        }
+
+        return reviews;
+    }
+
+    async countByUsuario(userId: number): Promise<number> {
+        const reviews = await this.reviewsRepo.find({
+            where: {
+                user: { id: userId },
+            },
+            relations: ['pelicula'],
+            order: { id: 'DESC' },
+        });
+
+        if (!reviews || reviews.length === 0) {
+            throw new NotFoundException("Este usuario no hizo ninguna review.")
+        }
+
+        return reviews.length;
     }
 
     /**

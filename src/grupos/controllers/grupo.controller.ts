@@ -1,4 +1,4 @@
-import {Controller, Post, Body, Param, ParseIntPipe, Req, UseGuards, Get, Request, } from '@nestjs/common';
+import { Controller, Post, Body, Param, ParseIntPipe, Req, UseGuards, Get, Request, } from '@nestjs/common';
 import { GrupoService } from '../services/grupo.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CreateGrupoDto } from '../dto/create-grupo.dto';
@@ -14,7 +14,7 @@ export class GrupoController {
    * Inyecta el servicio de grupos
    * @param grupoService Servicio que contiene la logica de negocio de Grupos
    */
-  constructor(private readonly grupoService: GrupoService) {}
+  constructor(private readonly grupoService: GrupoService) { }
 
   /**
    * Crea un grupo
@@ -67,5 +67,10 @@ export class GrupoController {
   @Get(':id/members')
   getMembersByGroup(@Param('id', ParseIntPipe) grupoId: number) {
     return this.grupoService.getMembers(grupoId);
+  }
+
+  @Get(':id/count-members')
+  async countMembers(@Param('id', ParseIntPipe) id: number) {
+    return { cantidad: await this.grupoService.countMembers(id) };
   }
 }

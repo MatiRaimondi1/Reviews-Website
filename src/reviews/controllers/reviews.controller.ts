@@ -10,11 +10,11 @@ import { Role } from "src/auth/decorators/role.decorator";
 @Controller('api/reviews')
 export class ReviewsController {
 
-   /**
-   * Inyecta el servicio de Reviews
-   * @param reviewsService Servicio que contiene la logica de negocio de Reviews
-   */
-    constructor(private readonly reviewsService: ReviewsService) {}
+    /**
+    * Inyecta el servicio de Reviews
+    * @param reviewsService Servicio que contiene la logica de negocio de Reviews
+    */
+    constructor(private readonly reviewsService: ReviewsService) { }
 
     /**
      * Crea una nueva review
@@ -46,8 +46,18 @@ export class ReviewsController {
      * @returns Promesa con las reviews
      */
     @Get(':peliculaId')
-    async findByPelicula(@Param('peliculaId', ParseIntPipe) peliculaId: number) {
+    findByPelicula(@Param('peliculaId', ParseIntPipe) peliculaId: number) {
         return this.reviewsService.findByPelicula(peliculaId);
+    }
+
+    @Get('user/:userId')
+    getReviewsByUsuario(@Param('userId', ParseIntPipe) userId: number) {
+        return this.reviewsService.findByUsuario(userId);
+    }
+
+    @Get('user/:userId/count')
+    async countReviewsByUsuario(@Param('userId', ParseIntPipe) userId: number) {
+        return { cantidad: await this.reviewsService.countByUsuario(userId) };
     }
 
     /**
@@ -60,7 +70,7 @@ export class ReviewsController {
     @UseGuards(JwtAuthGuard)
     @Role('user', 'admin')
     @Delete(':id')
-    async delete(@Param('id', ParseIntPipe) id: number, @Request() req) {
+    delete(@Param('id', ParseIntPipe) id: number, @Request() req) {
         const user = req.user.id;
         return this.reviewsService.delete(id, user);
     }
