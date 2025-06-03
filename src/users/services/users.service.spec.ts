@@ -3,6 +3,7 @@ import { UsersService } from "./users.service";
 import { User } from "../entities/user.entity";
 import { getRepositoryToken } from "@nestjs/typeorm";
 import { Test, TestingModule } from '@nestjs/testing';
+import { NotFoundException } from "@nestjs/common";
 
 const mockRepo = () => ({
     find: jest.fn(),
@@ -13,7 +14,7 @@ const mockRepo = () => ({
     delete: jest.fn(),
 });
 
-describe ('UsersService', () => {
+describe('UsersService', () => {
     let service: UsersService
     let repo: jest.Mocked<Repository<User>>
 
@@ -32,7 +33,7 @@ describe ('UsersService', () => {
         repo = module.get(getRepositoryToken(User));
     });
 
-    it('findAll debe devolver todos los usuarios',  async () => {
+    it('findAll debe devolver todos los usuarios', async () => {
         const result = [{ id: 1, nombre: 'Pablo' }];
         repo.find.mockResolvedValue(result as any);
 
@@ -40,36 +41,55 @@ describe ('UsersService', () => {
         expect(response).toEqual(result);
     })
 
-    it('findOne debe devolver un solo usuario basado en el ID', async () =>{
-        const result = [{id: 1, nombre: 'Pablo'}];
+    it('findOne debe devolver un solo usuario basado en el ID', async () => {
+        const result = [{ id: 1, nombre: 'Pablo' }];
         repo.findOneBy.mockResolvedValue(result as any);
 
         const response = await service.findOne(1);
-        expect(repo.findOneBy).toHaveBeenCalledWith({id: 1})
+        expect(repo.findOneBy).toHaveBeenCalledWith({ id: 1 })
         expect(response).toEqual(result);
     })
 
-    it('findOneByEmail debe devolver un solo usuario basado en el email', async () =>{
-        const result = [{id: 1, nombre: 'Pablo', email: 'pablo@ejemplo.com'}];
+    it('findOneByEmail debe devolver un solo usuario basado en el email', async () => {
+        const result = [{ id: 1, nombre: 'Pablo', email: 'pablo@ejemplo.com' }];
         repo.findOneBy.mockResolvedValue(result as any);
 
         const response = await service.findOneByEmail('pablo@ejemplo.com');
-        expect(repo.findOneBy).toHaveBeenCalledWith({email: 'pablo@ejemplo.com'});
+        expect(repo.findOneBy).toHaveBeenCalledWith({ email: 'pablo@ejemplo.com' });
         expect(response).toEqual(result);
     })
 
-    it('create debe guardar un nuevo usuario', async () =>{
+    it('create debe guardar un nuevo usuario', async () => {
         const dto = {
             username: 'Pablo',
             email: 'pablo@ejemplo.com',
             password: 'contrasenia',
         };
-        const result = { id:1, ...dto};
-        
+        const result = { id: 1, ...dto };
+
         repo.save.mockResolvedValue(result as any);
 
         const response = await service.create(dto)
         expect(response).toEqual(result);
         expect(repo.save).toHaveBeenCalledWith(dto);
     })
+
+    describe('updateProfileImage', () => {
+        it('debería lanzar NotFoundException si el usuario no existe', async () => {
+            repo.findOneBy.mockResolvedValue(null);
+
+            await expect(service.updateProfileImage(1, '/uploads/newimage.png')).rejects.toThrow(NotFoundException);
+        });
+
+        it('debería actualizar la url de imagen del usuario y devolver mensaje de éxito', async () => {
+            const mockUser = { id: 1, urlImagen: '' } as User;
+
+            repo.findOneBy.mockResolvedValue(mockUser);
+
+            const result = await service.updateProfileImage(1, '/uploads/newimage.png');
+
+            expect(mockUser.urlImagen).toBe('/uploads/newimage.png');
+            expect(result).toEqual({ message: 'Imagen de perfil cambiada correctamente.' });
+        });
+    });
 })
