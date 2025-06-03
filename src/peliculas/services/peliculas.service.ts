@@ -84,6 +84,12 @@ export class PeliculasService {
         return pelicula;
     }
 
+    /**
+     * Busca todas las peliculas que coincidan con un cierto termino de busqueda
+     * 
+     * @param key Nombre parcial de la/s pelicula/s a buscar
+     * @returns Promesa con todas las peliculas que coincidan
+     */
     async findByKey(key: string) {
         const peliculas = await this.peliculasRepo.find({
             where: {

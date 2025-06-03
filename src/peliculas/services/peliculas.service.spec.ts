@@ -3,7 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { PeliculasService } from './peliculas.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Pelicula } from '../entities/pelicula.entity';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import { NotFoundException } from '@nestjs/common';
 
 const mockRepo = () => ({
@@ -85,8 +85,27 @@ describe('PeliculasService', () => {
         repo.delete.mockResolvedValue({ affected: 1 } as any);
 
         const result = await service.delete(1);
-        const expectedResult = {"message": "Película eliminada correctamente.", "success": true}
+        const expectedResult = { "message": "Película eliminada correctamente.", "success": true }
         expect(repo.delete).toHaveBeenCalledWith(1);
         expect(result).toStrictEqual(expectedResult);
+    });
+
+    it('debería devolver películas que coincidan con la clave', async () => {
+        const mockPeliculas = [
+            { id: 1, nombre: 'Batman' },
+            { id: 2, nombre: 'Batalla naval' },
+        ] as Pelicula[];
+
+        repo.find.mockResolvedValue(mockPeliculas);
+
+        const result = await service.findByKey('bat');
+
+        expect(repo.find).toHaveBeenCalledWith({
+            where: {
+                nombre: Like('%bat%'),
+            },
+            order: { nombre: 'ASC' },
+        });
+        expect(result).toEqual(mockPeliculas);
     });
 });

@@ -82,6 +82,12 @@ export class PeliculasController {
         return this.peliculasService.create(dto, urlImagen);
     }
 
+    /**
+     * Busca todas las peliculas que coincidan con un cierto termino de busqueda
+     * 
+     * @param query Nombre parcial de la/s pelicula/s a buscar
+     * @returns Todas las peliculas que coincidan
+     */
     @Get('search/name')
     buscar(@Query('q') query: string) {
         if (!query || query.trim() === '') {
