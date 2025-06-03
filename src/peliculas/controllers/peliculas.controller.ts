@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Post, Body, Put, Delete, UseGuards, Query, UseInterceptors, UploadedFile, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Param, Post, Body, Put, Delete, UseGuards, Query, UseInterceptors, UploadedFile, ParseIntPipe, BadRequestException } from '@nestjs/common';
 import { PeliculasService } from '../services/peliculas.service';
 import { CreatePeliculaDto } from '../dto/create-pelicula.dto';
 import { UpdatePeliculaDto } from '../dto/update-pelicula.dto';
@@ -80,6 +80,14 @@ export class PeliculasController {
     create(@Body() dto: CreatePeliculaDto, @UploadedFile() imagen: Express.Multer.File) {
         const urlImagen = imagen ? `/uploads/peliculas/${imagen.filename}` : null;
         return this.peliculasService.create(dto, urlImagen);
+    }
+
+    @Get('search/name')
+    buscar(@Query('q') query: string) {
+        if (!query || query.trim() === '') {
+            throw new BadRequestException('Debe proporcionar un término de búsqueda');
+        }
+        return this.peliculasService.findByKey(query);
     }
 
     /**
