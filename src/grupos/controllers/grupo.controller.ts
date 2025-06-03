@@ -69,6 +69,12 @@ export class GrupoController {
     return this.grupoService.getMembers(grupoId);
   }
 
+  /**
+   * Obtiene la cantidad de miembros dentro de un grupo
+   * 
+   * @param id ID del grupo a buscar
+   * @returns Cantidad de miembros del grupo
+   */
   @Get(':id/count-members')
   async countMembers(@Param('id', ParseIntPipe) id: number) {
     return { cantidad: await this.grupoService.countMembers(id) };

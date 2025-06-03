@@ -50,11 +50,23 @@ export class ReviewsController {
         return this.reviewsService.findByPelicula(peliculaId);
     }
 
+    /**
+     * Obtiene todas las reviews de un usuario
+     * 
+     * @param userId ID del usuario a buscar
+     * @returns Todas las reviews que hizo un usuario especifico
+     */
     @Get('user/:userId')
     getReviewsByUsuario(@Param('userId', ParseIntPipe) userId: number) {
         return this.reviewsService.findByUsuario(userId);
     }
 
+    /**
+     * Obtiene la cantidad total de reviews que hizo un usuario
+     * 
+     * @param userId ID del usuario a buscar
+     * @returns Cantidad total de reviews que hizo un usuario
+     */
     @Get('user/:userId/count')
     async countReviewsByUsuario(@Param('userId', ParseIntPipe) userId: number) {
         return { cantidad: await this.reviewsService.countByUsuario(userId) };

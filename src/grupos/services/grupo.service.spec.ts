@@ -16,13 +16,13 @@ const mockRepo = () => ({
     delete: jest.fn(),
 })
 
-describe ('GrupoService', () =>{
+describe('GrupoService', () => {
     let service: GrupoService;
     let repoGrupos: jest.Mocked<Repository<Grupo>>;
     let repoUsers: jest.Mocked<Repository<User>>;
     let repoMembresias: jest.Mocked<Repository<MembresiaGrupo>>;
 
-    beforeEach(async ()=>{
+    beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
             providers: [
                 GrupoService,
@@ -47,78 +47,80 @@ describe ('GrupoService', () =>{
         repoMembresias = module.get(getRepositoryToken(MembresiaGrupo));
     });
 
-    describe('create', () =>{
-        it('Debe crear un nuevo grupo', async () =>{
-            const grupo = {id: 1, nombre: 'Pablolandia', descripcion:'Grupo de Pablo'};
-            const user = {id: 1, nombre: 'Pablo'}
+    it('Debe crear un nuevo grupo', async () => {
+        const grupo = { id: 1, nombre: 'Pablolandia', descripcion: 'Grupo de Pablo' };
+        const user = { id: 1, nombre: 'Pablo' }
 
-            repoUsers.findOneBy.mockResolvedValue(user as any)
-            
-            repoGrupos.create.mockReturnValue(grupo as any)
-            repoGrupos.save.mockResolvedValue(grupo as any);
+        repoUsers.findOneBy.mockResolvedValue(user as any)
 
-            const result = await service.create(grupo.nombre, 2, grupo.descripcion);
+        repoGrupos.create.mockReturnValue(grupo as any)
+        repoGrupos.save.mockResolvedValue(grupo as any);
 
-            expect(repoGrupos.save).toHaveBeenCalledWith(grupo);
-            expect(result).toEqual(grupo);
-        })
+        const result = await service.create(grupo.nombre, 2, grupo.descripcion);
+
+        expect(repoGrupos.save).toHaveBeenCalledWith(grupo);
+        expect(result).toEqual(grupo);
     })
 
-    describe('join', () =>{
-        it('Debe permitirle a un usuario unirse a un grupo', async () =>{
-            const grupo = {id: 1, nombre: 'Pablolandia', descripcion:'Grupo de Pablo'};
-            const user = {id: 2, nombre: 'Juan'};
-            const membresiaGrupo = {id: 3, user: user, grupo: grupo, rol: 'miembro',}
+    it('Debe permitirle a un usuario unirse a un grupo', async () => {
+        const grupo = { id: 1, nombre: 'Pablolandia', descripcion: 'Grupo de Pablo' };
+        const user = { id: 2, nombre: 'Juan' };
+        const membresiaGrupo = { id: 3, user: user, grupo: grupo, rol: 'miembro', }
 
-            repoUsers.findOneBy.mockResolvedValue(user as any);
-            repoGrupos.findOneBy.mockResolvedValue(grupo as any);
+        repoUsers.findOneBy.mockResolvedValue(user as any);
+        repoGrupos.findOneBy.mockResolvedValue(grupo as any);
 
-            repoMembresias.create.mockReturnValue(membresiaGrupo as any);
-            repoMembresias.save.mockResolvedValue(membresiaGrupo as any);
+        repoMembresias.create.mockReturnValue(membresiaGrupo as any);
+        repoMembresias.save.mockResolvedValue(membresiaGrupo as any);
 
-            const result = await service.join(1, 2);
+        const result = await service.join(1, 2);
 
-            expect(repoMembresias.create).toHaveBeenCalledWith({grupo, user: user, rol: 'miembro'});
-            expect(repoMembresias.save).toHaveBeenCalledWith(membresiaGrupo)
-            expect(result).toEqual({ mensaje: 'Te uniste al grupo correctamente' })
-        })
+        expect(repoMembresias.create).toHaveBeenCalledWith({ grupo, user: user, rol: 'miembro' });
+        expect(repoMembresias.save).toHaveBeenCalledWith(membresiaGrupo)
+        expect(result).toEqual({ mensaje: 'Te uniste al grupo correctamente' })
     })
 
-    describe('getAll', () =>{
-        it('Debe obtener todos los grupos', async() =>{
-            const grupo = {id: 1, nombre: 'Pablolandia', descripcion:'Grupo de Pablo'};
-            repoGrupos.find.mockResolvedValue(grupo as any)
+    it('Debe obtener todos los grupos', async () => {
+        const grupo = { id: 1, nombre: 'Pablolandia', descripcion: 'Grupo de Pablo' };
+        repoGrupos.find.mockResolvedValue(grupo as any)
 
-            const result = await service.getAll();
+        const result = await service.getAll();
 
-            expect(result).toEqual(grupo);
-        })
+        expect(result).toEqual(grupo);
     })
 
-    describe('getOneById', () =>{
-        it('Debe obtener un solo grupo mediante su Id', async()=>{
-            const grupo = {id: 1, nombre: 'Pablolandia', descripcion:'Grupo de Pablo'};
-            repoGrupos.findOneBy.mockResolvedValue(grupo as any)
+    it('Debe obtener un solo grupo mediante su Id', async () => {
+        const grupo = { id: 1, nombre: 'Pablolandia', descripcion: 'Grupo de Pablo' };
+        repoGrupos.findOneBy.mockResolvedValue(grupo as any)
 
-            const result = await service.getOneById(1);
+        const result = await service.getOneById(1);
 
-            expect(repoGrupos.findOneBy).toHaveBeenCalledWith({id: 1});
-            expect(result).toEqual(grupo);
-        })
+        expect(repoGrupos.findOneBy).toHaveBeenCalledWith({ id: 1 });
+        expect(result).toEqual(grupo);
     })
 
-    describe('getMembers', () =>{
-        it('Debe obtener los miembros de un grupo', async()=>{
-            let grupo = {id: 1, nombre: 'Pablolandia', descripcion:'Grupo de Pablo', usuariosRelacionados: {}};
-            const user = {id: 2, username: 'Juan'};
-            const membresiaGrupo = {id: 3, user: user, grupo: grupo, rol: 'miembro',}
-            grupo = {id: 1, nombre: 'Pablolandia', descripcion:'Grupo de Pablo', usuariosRelacionados: [membresiaGrupo]}
+    it('Debe obtener los miembros de un grupo', async () => {
+        let grupo = { id: 1, nombre: 'Pablolandia', descripcion: 'Grupo de Pablo', usuariosRelacionados: {} };
+        const user = { id: 2, username: 'Juan' };
+        const membresiaGrupo = { id: 3, user: user, grupo: grupo, rol: 'miembro', }
+        grupo = { id: 1, nombre: 'Pablolandia', descripcion: 'Grupo de Pablo', usuariosRelacionados: [membresiaGrupo] }
 
-            repoGrupos.findOne.mockResolvedValue(grupo as any);
-            
-            const result = await service.getMembers(1);
+        repoGrupos.findOne.mockResolvedValue(grupo as any);
 
-            expect(result).toEqual([{id: 2, nombre: 'Juan', rol: 'miembro'}]);
-        })
+        const result = await service.getMembers(1);
+
+        expect(result).toEqual([{ id: 2, nombre: 'Juan', rol: 'miembro' }]);
     })
+
+    it('debería devolver la cantidad de miembros del grupo', async () => {
+        const fakeGrupo = {
+            id: 1,
+            usuariosRelacionados: [{}, {}, {}],
+        } as Grupo;
+
+        jest.spyOn(repoGrupos, 'findOne').mockResolvedValue(fakeGrupo);
+
+        const result = await service.countMembers(1);
+        expect(result).toBe(3);
+    });
 })

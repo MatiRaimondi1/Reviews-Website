@@ -101,6 +101,12 @@ export class ReviewsService {
         });
     }
 
+    /**
+     * Logica para buscar todas las reviews que hizo un usuario en especifico
+     * 
+     * @param userId ID del usuario a buscar
+     * @returns Promesa con todas las reviews que hizo un usuario en especifico sin importar la pelicula
+     */
     async findByUsuario(userId: number) {
         const reviews = await this.reviewsRepo.find({
             where: {
@@ -117,6 +123,12 @@ export class ReviewsService {
         return reviews;
     }
 
+    /**
+     * Cuenta la cantidad de reviews que hizo un usuario en especifico
+     * 
+     * @param userId ID del usuario a buscar
+     * @returns Promesa con la cantidad de reviews que hizo un usuario en especifico sin importar la pelicula
+     */
     async countByUsuario(userId: number): Promise<number> {
         const reviews = await this.reviewsRepo.find({
             where: {

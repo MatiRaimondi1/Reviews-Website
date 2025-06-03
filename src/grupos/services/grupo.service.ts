@@ -121,6 +121,12 @@ export class GrupoService {
     }));
   }
 
+  /**
+   * Logica para obtener la cantidad de miembros de un grupo
+   * 
+   * @param grupoId ID del grupo a buscar
+   * @returns Cantidad de miembros dentro del grupo con el ID especificado
+   */
   async countMembers(grupoId: number): Promise<number> {
     const grupo = await this.grupoRepo.findOne({
       where: { id: grupoId },

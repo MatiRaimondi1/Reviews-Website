@@ -3,7 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { PeliculasService } from './peliculas.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Pelicula } from '../entities/pelicula.entity';
-import { Like, Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import { NotFoundException } from '@nestjs/common';
 
 const mockRepo = () => ({
@@ -102,7 +102,7 @@ describe('PeliculasService', () => {
 
         expect(repo.find).toHaveBeenCalledWith({
             where: {
-                nombre: Like('%bat%'),
+                nombre: ILike('%bat%'),
             },
             order: { nombre: 'ASC' },
         });
