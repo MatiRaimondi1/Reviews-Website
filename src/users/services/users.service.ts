@@ -79,10 +79,11 @@ export class UsersService {
    * @returns Mensaje de exito
    */
   async updateProfileImage(userId: number, imageUrl: string) {
-    const user = await this.userRepo.findOneBy({ id: userId });
-    if (!user) throw new NotFoundException('Usuario no encontrado');
+    const result = await this.userRepo.update(userId, { urlImagen: imageUrl });
+    if (result.affected === 0) {
+      throw new NotFoundException("El usuario no fue encontrado.")
+    }
 
-    user.urlImagen = imageUrl;
-    return { "message": "Imagen de perfil cambiada correctamente." }
+    return { message: "Imagen de perfil cambiada correctamente." }
   }
 }
