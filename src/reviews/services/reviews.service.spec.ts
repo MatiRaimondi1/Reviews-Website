@@ -6,7 +6,7 @@ import { Pelicula } from "src/peliculas/entities/pelicula.entity";
 import { Grupo } from "src/grupos/entities/grupo.entity";
 import { Test, TestingModule } from "@nestjs/testing";
 import { getRepositoryToken } from "@nestjs/typeorm";
-import { ConflictException, ForbiddenException, NotFoundException } from "@nestjs/common";
+import { BadRequestException, ConflictException, ForbiddenException, NotFoundException } from "@nestjs/common";
 
 const mockRepoReviews = () => ({
     find: jest.fn(),
@@ -191,44 +191,46 @@ describe('reviewsService', () => {
         expect(result).toEqual(result);
     })
 
-    describe('errores de la funcion create', () =>{
-        it('debe lanzar NotFoundException si no existe el usuario y/o pelicula', async ()=>{
+    describe('errores de la funcion create', () => {
+        it('debe lanzar NotFoundException si no existe el usuario y/o pelicula', async () => {
             const dto = {
-            texto: 'ejemplo',
-            puntuacion: 5,
+                texto: 'ejemplo',
+                puntuacion: 5,
             };
             repoUsers.findOneBy.mockResolvedValue(null);
 
             expect(service.create(dto, 1, 2)).rejects.toThrow(NotFoundException);
         })
-        it('debe lanzar ConflictException si ya existe una review de esa pelicula por ese usuario', async ()=>{
+
+        it('debe lanzar ConflictException si ya existe una review de esa pelicula por ese usuario', async () => {
             const dto = {
-            texto: 'ejemplo',
-            puntuacion: 5,
+                texto: 'ejemplo',
+                puntuacion: 5,
             };
-            const user = {id: 2, username: 'pablo'};
-            const pelicula = {id: 3}
-            const existingReview = {id: 4, user: user, pelicula: pelicula};
+            const user = { id: 2, username: 'pablo' };
+            const pelicula = { id: 3 }
+            const existingReview = { id: 4, user: user, pelicula: pelicula };
 
             repoUsers.findOneBy.mockResolvedValue(user as any);
             repoPeliculas.findOneBy.mockResolvedValue(pelicula as any);
 
             const mockQueryBuilder = {
-            where: jest.fn().mockReturnThis(),
-            andWhere: jest.fn().mockReturnThis(),
-            getOne: jest.fn().mockResolvedValue(existingReview),
+                where: jest.fn().mockReturnThis(),
+                andWhere: jest.fn().mockReturnThis(),
+                getOne: jest.fn().mockResolvedValue(existingReview),
             };
             repoReviews.createQueryBuilder.mockReturnValue(mockQueryBuilder as any);
 
             expect(service.create(dto, 2, 3)).rejects.toThrow(ConflictException);
         })
-        it('si al crear una review grupal el grupo no existe, debe lanzar NotFoundException', async () =>{
+
+        it('si al crear una review grupal el grupo no existe, debe lanzar NotFoundException', async () => {
             const dto = {
-            texto: 'ejemplo',
-            puntuacion: 5,
+                texto: 'ejemplo',
+                puntuacion: 5,
             };
-            const user = {id: 2, username: 'pablo'};
-            const pelicula = {id: 3}
+            const user = { id: 2, username: 'pablo' };
+            const pelicula = { id: 3 }
 
             repoUsers.findOneBy.mockResolvedValue(user as any);
             repoPeliculas.findOneBy.mockResolvedValue(pelicula as any);
@@ -236,14 +238,15 @@ describe('reviewsService', () => {
 
             expect(service.create(dto, 2, 3, 4)).rejects.toThrow(NotFoundException);
         })
-        it('si al crear una review grupal el miembro no es lider, lanzar ForbiddenException', async () =>{
+
+        it('si al crear una review grupal el miembro no es lider, lanzar ForbiddenException', async () => {
             const dto = {
-            texto: 'ejemplo',
-            puntuacion: 5,
+                texto: 'ejemplo',
+                puntuacion: 5,
             };
-            const user = {id: 2, username: 'pablo'};
-            const pelicula = {id: 3}
-            const grupo = {id: 4, usuariosRelacionados: [{user: { id: 2 }, rol: 'miembro',}]}
+            const user = { id: 2, username: 'pablo' };
+            const pelicula = { id: 3 }
+            const grupo = { id: 4, usuariosRelacionados: [{ user: { id: 2 }, rol: 'miembro', }] }
 
             repoUsers.findOneBy.mockResolvedValue(user as any);
             repoPeliculas.findOneBy.mockResolvedValue(pelicula as any);
@@ -251,24 +254,25 @@ describe('reviewsService', () => {
 
             expect(service.create(dto, 2, 3, 4)).rejects.toThrow(ForbiddenException);
         })
-        it('debe lanzar ConflictException si ya existe una review grupal de la pelicula determinada por este grupo', async ()=>{
+
+        it('debe lanzar ConflictException si ya existe una review grupal de la pelicula determinada por este grupo', async () => {
             const dto = {
-            texto: 'ejemplo',
-            puntuacion: 5,
+                texto: 'ejemplo',
+                puntuacion: 5,
             };
-            const user = {id: 2, username: 'pablo'};
-            const pelicula = {id: 3};
-            const grupo = {id: 4, usuariosRelacionados: [{user: { id: 2 }, rol: 'lider',}]};
-            const existingGroupReview = {id: 4, user: user, pelicula: pelicula, grupo: grupo};
+            const user = { id: 2, username: 'pablo' };
+            const pelicula = { id: 3 };
+            const grupo = { id: 4, usuariosRelacionados: [{ user: { id: 2 }, rol: 'lider', }] };
+            const existingGroupReview = { id: 4, user: user, pelicula: pelicula, grupo: grupo };
 
             repoUsers.findOneBy.mockResolvedValue(user as any);
             repoPeliculas.findOneBy.mockResolvedValue(pelicula as any);
             repoGrupos.findOne.mockResolvedValue(grupo as any);
 
             const mockQueryBuilder = {
-            where: jest.fn().mockReturnThis(),
-            andWhere: jest.fn().mockReturnThis(),
-            getOne: jest.fn().mockResolvedValue(existingGroupReview),
+                where: jest.fn().mockReturnThis(),
+                andWhere: jest.fn().mockReturnThis(),
+                getOne: jest.fn().mockResolvedValue(existingGroupReview),
             };
             repoReviews.createQueryBuilder.mockReturnValue(mockQueryBuilder as any);
 
@@ -378,9 +382,85 @@ describe('reviewsService', () => {
         });
     });
 
-    it('si el usuario no hizo reviews, lanzar NotFoundException', async () =>{
+    it('si el usuario no hizo reviews, lanzar NotFoundException', async () => {
         repoReviews.find.mockResolvedValue([]);
 
         expect(service.countByUsuario(1)).rejects.toThrow(NotFoundException);
     })
+
+    it('debería actualizar la review si el usuario es autor o admin', async () => {
+        const review = {
+            id: 1,
+            texto: 'Original',
+            puntuacion: 3,
+            user: { id: 1 },
+        } as Review;
+
+        const user = {
+            id: 1,
+            rol: 'user',
+            username: 'testuser',
+            email: 'test@example.com',
+            password: 'hashedpassword',
+            fechaCreacion: new Date(),
+        } as User;
+
+        repoReviews.findOne.mockResolvedValue(review);
+        repoUsers.findOneBy.mockResolvedValue(user);
+        repoReviews.save.mockResolvedValue({ ...review, texto: 'Editado', puntuacion: 5 });
+
+        const updateData = { texto: 'Editado', puntuacion: 5 };
+        const result = await service.edit(1, 1, updateData);
+
+        expect(repoReviews.findOne).toHaveBeenCalledWith({
+            where: { id: 1 },
+            relations: ['user'],
+        });
+        expect(repoUsers.findOneBy).toHaveBeenCalledWith({ id: 1 });
+        expect(repoReviews.save).toHaveBeenCalledWith({
+            ...review,
+            ...updateData,
+        });
+        expect(result).toEqual({ ...review, ...updateData });
+    });
+
+    it('debería lanzar BadRequestException si la review no existe', async () => {
+        repoReviews.findOne.mockResolvedValue(null);
+        await expect(service.edit(1, 1, { texto: 'x' })).rejects.toThrow(BadRequestException);
+    });
+
+    it('debería lanzar BadRequestException si el usuario no existe', async () => {
+        const review = {
+            id: 1,
+            texto: 'Original',
+            puntuacion: 3,
+            user: { id: 1 },
+        } as Review;
+
+        repoReviews.findOne.mockResolvedValue(review);
+        repoUsers.findOneBy.mockResolvedValue(null);
+        await expect(service.edit(1, 1, { texto: 'x' })).rejects.toThrow(BadRequestException);
+    });
+
+    it('debería lanzar BadRequestException si el usuario no es autor ni admin', async () => {
+        const review = {
+            id: 1,
+            texto: 'Original',
+            puntuacion: 3,
+            user: { id: 1 },
+        } as Review;
+
+        const user = {
+            id: 2,
+            rol: 'user',
+            username: 'testuser',
+            email: 'test@example.com',
+            password: 'hashedpassword',
+            fechaCreacion: new Date(),
+        } as User;
+        
+        repoReviews.findOne.mockResolvedValue(review);
+        repoUsers.findOneBy.mockResolvedValue(user);
+        await expect(service.edit(1, 2, { texto: 'x' })).rejects.toThrow(BadRequestException);
+    });
 })

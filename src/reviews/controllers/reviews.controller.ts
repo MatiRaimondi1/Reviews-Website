@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Request, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Request, UseGuards } from "@nestjs/common";
 import { ReviewsService } from "../services/reviews.service";
 import { CreateReviewDto } from "../dto/create-review.dto";
 import { JwtAuthGuard } from "src/auth/guards/jwt-auth.guard";
@@ -70,6 +70,18 @@ export class ReviewsController {
     @Get('user/:userId/count')
     async countReviewsByUsuario(@Param('userId', ParseIntPipe) userId: number) {
         return { cantidad: await this.reviewsService.countByUsuario(userId) };
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Role('user', 'admin')
+    @Patch(':id')
+    async edit(
+        @Param('id', ParseIntPipe) id: number,
+        @Body() updateData: { texto?: string; puntuacion?: number },
+        @Request() req,
+    ) {
+        const userId = req.user.id;
+        return this.reviewsService.edit(id, userId, updateData);
     }
 
     /**

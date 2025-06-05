@@ -34,20 +34,18 @@ describe('UsersService', () => {
         repo = module.get(getRepositoryToken(User));
     });
 
-    describe('findAll', () => {
-        it('findAll debe devolver todos los usuarios', async () => {
-            const result = [{ id: 1, nombre: 'Pablo' }];
-            repo.find.mockResolvedValue(result as any);
+    it('findAll debe devolver todos los usuarios', async () => {
+        const result = [{ id: 1, nombre: 'Pablo' }];
+        repo.find.mockResolvedValue(result as any);
 
-            const response = await service.findAll();
-            expect(response).toEqual(result);
-        })
+        const response = await service.findAll();
+        expect(response).toEqual(result);
+    })
 
-        it('si no hay usuarios, findAll debe tirar una excepcion', async () => {
-            repo.find.mockResolvedValue([]);
+    it('si no hay usuarios, findAll debe tirar una excepcion', async () => {
+        repo.find.mockResolvedValue([]);
 
-            await expect(service.findAll()).rejects.toThrow(NotFoundException);
-        })
+        await expect(service.findAll()).rejects.toThrow(NotFoundException);
     })
 
     it('findOne debe devolver un solo usuario basado en el ID', async () => {
@@ -89,20 +87,18 @@ describe('UsersService', () => {
         expect(repo.save).toHaveBeenCalledWith(dto);
     })
 
-    describe('updateProfileImage', () => {
-        it('debería lanzar NotFoundException si no se encuentra el usuario', async () => {
-            repo.update.mockResolvedValue({ affected: 0 } as UpdateResult);
+    it('debería lanzar NotFoundException si no se encuentra el usuario', async () => {
+        repo.update.mockResolvedValue({ affected: 0 } as UpdateResult);
 
-            await expect(service.updateProfileImage(999, '/uploads/image.jpg')).rejects.toThrow(NotFoundException);
-        });
+        await expect(service.updateProfileImage(999, '/uploads/image.jpg')).rejects.toThrow(NotFoundException);
+    });
 
-        it('debería actualizar la imagen de perfil correctamente', async () => {
-            repo.update.mockResolvedValue({ affected: 1 } as UpdateResult);
+    it('debería actualizar la imagen de perfil correctamente', async () => {
+        repo.update.mockResolvedValue({ affected: 1 } as UpdateResult);
 
-            const result = await service.updateProfileImage(1, '/uploads/user-123.jpg');
+        const result = await service.updateProfileImage(1, '/uploads/user-123.jpg');
 
-            expect(result).toEqual({ message: 'Imagen de perfil cambiada correctamente.' });
-            expect(repo.update).toHaveBeenCalledWith(1, { urlImagen: '/uploads/user-123.jpg' });
-        });
+        expect(result).toEqual({ message: 'Imagen de perfil cambiada correctamente.' });
+        expect(repo.update).toHaveBeenCalledWith(1, { urlImagen: '/uploads/user-123.jpg' });
     });
 })

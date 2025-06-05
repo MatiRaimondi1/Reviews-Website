@@ -13,6 +13,7 @@ describe('Reviews Controller', () => {
         delete: jest.fn(),
         findByUsuario: jest.fn(),
         countByUsuario: jest.fn(),
+        edit: jest.fn(),
     }
 
     beforeEach(async () => {
@@ -91,7 +92,6 @@ describe('Reviews Controller', () => {
         expect(response).toBe(true);
     })
 
-
     it('debería retornar todas las reviews del usuario', async () => {
         const fakeReviews = [
             {
@@ -121,5 +121,23 @@ describe('Reviews Controller', () => {
 
         expect(result).toEqual({ cantidad: 3 });
         expect(mockReviewsService.countByUsuario).toHaveBeenCalledWith(1);
+    });
+
+    it('debería llamar al servicio con los argumentos correctos y retornar la review actualizada', async () => {
+        const req = { user: { id: 1 } };
+        const updateDto = { texto: 'Editado', puntuacion: 4 };
+        const expectedResult = {
+            id: 1,
+            texto: 'Editado',
+            puntuacion: 4,
+            user: { id: 1 },
+        };
+
+        (service.edit as jest.Mock).mockResolvedValue(expectedResult);
+
+        const result = await controller.edit(1, updateDto, req);
+
+        expect(service.edit).toHaveBeenCalledWith(1, 1, updateDto);
+        expect(result).toEqual(expectedResult);
     });
 })

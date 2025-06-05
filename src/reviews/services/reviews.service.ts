@@ -145,6 +145,38 @@ export class ReviewsService {
         return reviews.length;
     }
 
+    async edit(id: number, userId: number, updateData: { texto?: string; puntuacion?: number }) {
+        const review = await this.reviewsRepo.findOne({
+            where: { id },
+            relations: ['user'],
+        });
+
+        if (!review) {
+            throw new BadRequestException("Reseña no encontrada");
+        }
+
+        const user = await this.usersRepo.findOneBy({ id: userId });
+        if (!user) {
+            throw new BadRequestException("Usuario no encontrado.");
+        }
+
+        const esAutor = review.user.id === userId;
+        const esAdmin = user.rol === 'admin';
+
+        if (!esAutor && !esAdmin) {
+            throw new BadRequestException("No puedes editar una reseña que no has creado");
+        }
+
+        if (updateData.texto !== undefined) {
+            review.texto = updateData.texto;
+        }
+        if (updateData.puntuacion !== undefined) {
+            review.puntuacion = updateData.puntuacion;
+        }
+
+        return this.reviewsRepo.save(review);
+    }
+
     /**
      * Logica para la eliminacion de una review
      * 
