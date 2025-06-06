@@ -6,6 +6,7 @@ import { Test, TestingModule } from "@nestjs/testing"
 import { getRepositoryToken } from "@nestjs/typeorm"
 import { ReunionService } from "./reunion.service"
 import { CreateReunionDto } from "../dto/create-reunion.dto"
+import { BadRequestException, ConflictException, NotFoundException } from "@nestjs/common"
 
 const mockRepoReunion = () => ({
     find: jest.fn(),
@@ -73,6 +74,23 @@ describe('reunionService', () =>{
             expect(result).toEqual(reunion);
             
         })
+
+        it('si la reunion ya existe, debe lanzar ConflictException',() =>{
+            const dto: CreateReunionDto = {
+                fecha: new Date(),
+                link: 'link.com'
+            };
+            const grupo = {id: 3, nombre: 'pablolandia', descripcion: 'grupo de pablo'};
+            let user = {id: 2, username: 'pablo', email: 'pablo@ejemplo.com', password: 'contrasenia', gruposRelacionados: {} };
+            const membresiaGrupo = {id: 4, user: user, grupo: grupo, rol:'lider'}
+            user = {id: 2, username: 'pablo', email: 'pablo@ejemplo.com', password: 'contrasenia', gruposRelacionados: [membresiaGrupo]}
+            const reunion = {id: 1, ...dto};
+
+            repoUsers.findOne.mockResolvedValue(user as any);
+            repoReunion.findOne.mockResolvedValue(reunion as any);
+
+            expect(service.create(2, dto)).rejects.toThrow(ConflictException);
+        })
     })
 
     describe('delete', () =>{
@@ -96,6 +114,10 @@ describe('reunionService', () =>{
 
             expect(repoReunion.remove).toHaveBeenCalledWith(reunion)
             expect(result).toEqual({ message: 'Reunión eliminada correctamente.' })
+        })
+        
+        it('Si no se encuentra la reunion, debe lanzar BadRequestException', ()=>{
+            expect(service.delete(2)).rejects.toThrow(BadRequestException);
         })
     })
 
@@ -121,6 +143,15 @@ describe('reunionService', () =>{
                 relations: ['grupo'],
             });
             expect(result).toEqual(reunion);
+        })
+        it('Si no se encuentra la reunion, debe lanzar NotFoundException', () =>{
+            const grupo = {id: 3, nombre: 'pablolandia', descripcion: 'grupo de pablo'};
+            let user = {id: 2, username: 'pablo', email: 'pablo@ejemplo.com', password: 'contrasenia', gruposRelacionados: {} };
+            const membresiaGrupo = {id: 4, user: user, grupo: grupo, rol:'lider'}
+            user = {id: 2, username: 'pablo', email: 'pablo@ejemplo.com', password: 'contrasenia', gruposRelacionados: [membresiaGrupo]}
+            
+            repoUsers.findOne.mockResolvedValue(user as any);
+            expect(service.getReunion(2)).rejects.toThrow(NotFoundException);
         })
     })
 })
