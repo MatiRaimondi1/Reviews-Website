@@ -48,6 +48,13 @@ export class GrupoService {
         return grupo;
     }
 
+    /**
+     * Logica para editar un grupo
+     * @param grupoId ID del grupo
+     * @param userId ID del usuario que intenta realizar los cambios
+     * @param cambios Campos a cambiar
+     * @returns Mensaje indicando el resultado de la operacion
+     */
     async update(grupoId: number, userId: number, cambios: { nombre?: string; descripcion?: string }) {
         const grupo = await this.grupoRepo.findOneBy({ id: grupoId });
         if (!grupo) {
@@ -81,6 +88,12 @@ export class GrupoService {
         return { mensaje: 'Grupo actualizado correctamente', grupo };
     }
 
+    /**
+     * Logica para eliminar un grupo
+     * @param grupoId ID del grupo a eliminar
+     * @param userId ID del usuario que intenta eliminar el grupo
+     * @returns Mensaje indicando el resultado de la operacion
+     */
     async delete(grupoId: number, userId: number) {
         const grupo = await this.grupoRepo.findOneBy({ id: grupoId });
         if (!grupo) {
@@ -111,6 +124,13 @@ export class GrupoService {
         return { mensaje: 'Grupo eliminado correctamente' };
     }
 
+    /**
+     * Logica para expulsar a un usuario de un grupo
+     * @param grupoId ID del grupo
+     * @param userIdExpulsar ID del usuario que se desea expulsar
+     * @param userIdSolicitante ID del usuario que esta intentando expulsar
+     * @returns Mensaje indicando el resultado de la operacion
+     */
     async kickUser(grupoId: number, userIdExpulsar: number, userIdSolicitante: number) {
         const grupo = await this.grupoRepo.findOneBy({ id: grupoId });
         if (!grupo) {
@@ -182,6 +202,12 @@ export class GrupoService {
         return { mensaje: 'Te uniste al grupo correctamente' };
     }
 
+    /**
+     * Logica para salirse de un grupo
+     * @param grupoId ID del grupo a salirse
+     * @param userId ID del usuario que intenta salirse
+     * @returns Mensaje indicando el resultado de la operacion
+     */
     async leave(grupoId: number, userId: number) {
         const relacion = await this.membresiaGrupoRepo.findOne({
             where: {
@@ -236,6 +262,11 @@ export class GrupoService {
         return grupo;
     }
 
+    /**
+     * Logica para buscar grupos por nombre
+     * @param nombre Nombre a buscar
+     * @returns Promesa con una lista de grupos que coinciden con el nombre dado
+     */
     async getByName(nombre: string) {
         const grupos = await this.grupoRepo.find({
             where: {
@@ -290,6 +321,12 @@ export class GrupoService {
         return grupo.usuariosRelacionados.length;
     }
 
+    /**
+     * Logica para saber si un usuario pertenece a un grupo
+     * @param userId ID del usuario
+     * @param grupoId ID del grupo
+     * @returns Promesa con mensaje indicando si el usuario pertenece o no al grupo
+     */
     async isUserInGroup(userId: number, grupoId: number) {
         const relacion = await this.membresiaGrupoRepo.findOne({
             where: {

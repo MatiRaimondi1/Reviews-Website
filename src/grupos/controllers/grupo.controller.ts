@@ -28,6 +28,13 @@ export class GrupoController {
         return this.grupoService.create(dto.nombre, userId, dto.descripcion);
     }
 
+    /**
+     * Edita un grupo
+     * @param grupoId ID del grupo a editar
+     * @param req El objeto de la request de HTTP
+     * @param cambios Campos a editar del grupo
+     * @returns Mensaje de resultado de la operacion
+     */
     @UseGuards(JwtAuthGuard)
     @Patch(':grupoId')
     async update(@Param('grupoId', ParseIntPipe) grupoId: number, @Request() req, @Body() cambios: { nombre?: string; descripcion?: string }) {
@@ -35,6 +42,13 @@ export class GrupoController {
         return this.grupoService.update(grupoId, userId, cambios);
     }
 
+    /**
+     * Expulsa a un usuario de un grupo
+     * @param grupoId ID del grupo
+     * @param userIdExpulsar ID del usuario a expulsar
+     * @param req El objeto de la request de HTTP
+     * @returns Mensaje de resultado de la operacion
+     */
     @UseGuards(JwtAuthGuard)
     @Delete(':grupoId/kick/:userId')
     async kick(@Param('grupoId', ParseIntPipe) grupoId: number, @Param('userId', ParseIntPipe) userIdExpulsar: number, @Request() req,) {
@@ -55,6 +69,12 @@ export class GrupoController {
         return this.grupoService.join(grupoId, userId);
     }
 
+    /**
+     * Salir de un grupo
+     * @param id ID del grupo a salirse
+     * @param req El objeto de la request de HTTP
+     * @returns Mensaje de resultado de la operacion
+     */
     @UseGuards(JwtAuthGuard)
     @Delete(':id/leave')
     async leaveGroup(@Param('id', ParseIntPipe) id: number, @Request() req) {
@@ -62,6 +82,12 @@ export class GrupoController {
         return this.grupoService.leave(id, userId);
     }
 
+    /**
+     * Eliminar un grupo
+     * @param id ID del grupo a eliminar
+     * @param req El objeto de la request de HTTP
+     * @returns Mensaje de resultado de la operacion
+     */
     @UseGuards(JwtAuthGuard)
     @Delete(':id')
     async deleteGroup(@Param('id', ParseIntPipe) id: number, @Request() req) {
@@ -88,6 +114,11 @@ export class GrupoController {
         return this.grupoService.getOneById(grupoId);
     }
 
+    /**
+     * Buscar grupo por nombre
+     * @param query Parametro con el nombre del grupo
+     * @returns Grupo con dicho nombre
+     */
     @Get('search/name')
     search(@Query('q') query: string) {
         if (!query || query.trim() === '') {
@@ -117,6 +148,12 @@ export class GrupoController {
         return { cantidad: await this.grupoService.countMembers(id) };
     }
 
+    /**
+     * Saber si un usuario pertenece a un grupo
+     * @param grupoId ID del grupo
+     * @param userId ID del usuario
+     * @returns Mensaje indicando si el usuario pertenece al grupo
+     */
     @Get(':grupoId/membership/:userId')
     async isUserInGroup(@Param('grupoId', ParseIntPipe) grupoId: number, @Param('userId', ParseIntPipe) userId: number) {
         return this.grupoService.isUserInGroup(userId, grupoId);
