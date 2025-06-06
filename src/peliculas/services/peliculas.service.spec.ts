@@ -47,7 +47,7 @@ describe('PeliculasService', () => {
         repo.find.mockResolvedValue(result as any);
 
         const response = await service.findAll();
-        expect(repo.find).toHaveBeenCalledWith({ skip: 0, take: 10 });
+        expect(repo.find).toHaveBeenCalledWith({ order: { nombre: 'ASC' }, skip: 0, take: 10 });
         expect(response).toEqual(result);
     });
 

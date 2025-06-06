@@ -37,7 +37,7 @@ describe('PeliculasController', () => {
 
             const response = await controller.findAll(2);
 
-            expect(mockPeliculasService.findAll).toHaveBeenCalledWith(2);
+            expect(mockPeliculasService.findAll).toHaveBeenCalledWith(2, undefined, undefined);
             expect(response).toEqual(result);
         });
 
@@ -47,7 +47,7 @@ describe('PeliculasController', () => {
 
             const response = await controller.findAll(undefined);
 
-            expect(mockPeliculasService.findAll).toHaveBeenCalledWith(0);
+            expect(mockPeliculasService.findAll).toHaveBeenCalledWith(0, undefined, undefined);
             expect(response).toEqual(result);
         });
     });

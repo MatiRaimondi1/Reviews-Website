@@ -27,10 +27,22 @@ export class PeliculasService {
      * @param page Número de página (comienza en 0). Por defecto, es 0.
      * @returns Promesa con una lista de hasta 10 películas.
      */
-    async findAll(page = 0) {
+    async findAll(page = 0, alphabetic?: 'asc' | 'desc', rating?: 'asc' | 'desc') {
         const limit = 10;
         const offset = page * limit;
+
+        const order: any = {};
+
+        if (alphabetic) {
+            order.nombre = alphabetic.toUpperCase();
+        } else if (rating) {
+            order.calificacion = rating.toUpperCase();
+        } else {
+            order.nombre = 'ASC';
+        }
+
         const peliculas = await this.peliculasRepo.find({
+            order,
             skip: offset,
             take: limit,
         });
@@ -49,19 +61,31 @@ export class PeliculasService {
      * @param page Número de página (comienza en 0). Por defecto, es 0.
      * @returns Promesa con una lista de hasta 10 peliculas por genero.
      */
-    async findByGenero(nombreGenero: string, page = 0) {
+    async findByGenero(nombreGenero: string, page = 0, alphabetic?: 'asc' | 'desc', rating?: 'asc' | 'desc') {
         if (!nombreGenero || nombreGenero.trim() === '') {
             throw new BadRequestException('El género no puede estar vacío.');
         }
 
         const limit = 10;
         const offset = page * limit;
+        
+        const order: any = {};
+
+        if (alphabetic) {
+            order.nombre = alphabetic.toUpperCase();
+        } else if (rating) {
+            order.calificacion = rating.toUpperCase();
+        } else {
+            order.nombre = 'ASC';
+        }
+
         const peliculas = await this.peliculasRepo.find({
             where: {
                 genero: {
                     nombre: nombreGenero
                 }
             },
+            order,
             skip: offset,
             take: limit,
         });
