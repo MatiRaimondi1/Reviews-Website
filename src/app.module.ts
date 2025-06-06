@@ -10,6 +10,7 @@ import { ReviewsModule } from './reviews/reviews.module';
 import { GrupoModule } from './grupos/grupo.module';
 import { ComentariosModule } from './comentarios/comentarios.module';
 import { ReunionModule } from './reuniones/reuniones.module';
+import { GenerosModule } from './generos/generos.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { ReunionModule } from './reuniones/reuniones.module';
     GrupoModule,
     ComentariosModule,
     ReunionModule,
+    GenerosModule,
   ],
   controllers: [],
   providers: [],

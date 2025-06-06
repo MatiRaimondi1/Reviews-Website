@@ -1,5 +1,6 @@
+import { Genero } from 'src/generos/entities/genero.entity';
 import { Review } from 'src/reviews/entities/review.entity';
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
 
 @Entity()
 export class Pelicula {
@@ -13,7 +14,11 @@ export class Pelicula {
     sinopsis: string;
 
     @Column({ nullable: false })
-    genero: string;
+    generoId: number;
+
+    @ManyToOne(() => Genero, { cascade: true, eager: true, nullable: false })
+    @JoinColumn({ name: 'generoId' })
+    genero: Genero;
 
     @Column({ type: 'date', nullable: false })
     fechaEstreno: Date;

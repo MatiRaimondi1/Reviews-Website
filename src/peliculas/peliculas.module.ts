@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { PeliculasService } from './services/peliculas.service';
 import { PeliculasController } from './controllers/peliculas.controller';
 import { Pelicula } from './entities/pelicula.entity';
+import { Genero } from 'src/generos/entities/genero.entity';
 
 /**
  * Encapsula los providers de la entidad Peliculas, y define que partes 
@@ -11,7 +12,7 @@ import { Pelicula } from './entities/pelicula.entity';
  */
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Pelicula])
+    TypeOrmModule.forFeature([Pelicula, Genero])
   ],
   providers: [PeliculasService],
   controllers: [PeliculasController],

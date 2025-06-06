@@ -1,9 +1,10 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ILike, Repository } from 'typeorm';
+import { DeepPartial, ILike, Repository } from 'typeorm';
 import { Pelicula } from '../entities/pelicula.entity';
 import { CreatePeliculaDto } from '../dto/create-pelicula.dto';
 import { UpdatePeliculaDto } from '../dto/update-pelicula.dto';
+import { Genero } from 'src/generos/entities/genero.entity';
 
 /**
  * Servicio encargado de gestionar las operaciones relacionadas con las películas.
@@ -16,8 +17,8 @@ export class PeliculasService {
      * @param peliculasRepo Repositorio de la entidad `Pelicula`.
      */
     constructor(
-        @InjectRepository(Pelicula)
-        private peliculasRepo: Repository<Pelicula>,
+        @InjectRepository(Genero) private generosRepo: Repository<Genero>,
+        @InjectRepository(Pelicula) private peliculasRepo: Repository<Pelicula>,
     ) { }
 
     /**
@@ -56,7 +57,11 @@ export class PeliculasService {
         const limit = 10;
         const offset = page * limit;
         const peliculas = await this.peliculasRepo.find({
-            where: { genero: nombreGenero },
+            where: {
+                genero: {
+                    nombre: nombreGenero
+                }
+            },
             skip: offset,
             take: limit,
         });
@@ -75,7 +80,7 @@ export class PeliculasService {
      * @returns Promesa con la película encontrada.
      */
     async findOne(id: number) {
-        const pelicula = await this.peliculasRepo.findOneBy({ id });
+        const pelicula = await this.peliculasRepo.findOneBy({ id: id });
 
         if (!pelicula) {
             throw new NotFoundException(`No se encontró una película con el ID ${id}.`);
@@ -119,8 +124,18 @@ export class PeliculasService {
             throw new ConflictException('Ya existe una pelicula con ese nombre.');
         }
 
+        let genero = await this.generosRepo.findOne({
+            where: { nombre: dto.genero.trim() },
+        });
+
+        if (!genero) {
+            genero = this.generosRepo.create({ nombre: dto.genero.trim() });
+            genero = await this.generosRepo.save(genero);
+        }
+
         const newPelicula = this.peliculasRepo.create({
             ...dto,
+            genero,
             urlImagen: urlImagen ?? undefined,
         });
 
@@ -134,14 +149,32 @@ export class PeliculasService {
      * @param body DTO con los campos a modificar.
      * @returns Promesa con la película actualizada.
      */
+
     async update(id: number, body: UpdatePeliculaDto) {
-        const pelicula = await this.peliculasRepo.findOneBy({ id });
+        const pelicula = await this.peliculasRepo.findOne({
+            where: { id },
+            relations: ['genero'],
+        });
 
         if (!pelicula) {
             throw new NotFoundException(`Pelicula con ID ${id} no encontrada`);
         }
 
-        this.peliculasRepo.merge(pelicula, body);
+        let genero: Genero | undefined = await this.generosRepo.findOneBy({ nombre: body.genero }) ?? undefined;
+
+        if (body.genero) {
+            if (!genero) {
+                genero = this.generosRepo.create({ nombre: body.genero });
+                genero = await this.generosRepo.save(genero);
+            }
+        }
+
+        const datosActualizados: DeepPartial<Pelicula> = {
+            ...body,
+            genero: genero,
+        };
+
+        this.peliculasRepo.merge(pelicula, datosActualizados);
         return this.peliculasRepo.save(pelicula);
     }
 
