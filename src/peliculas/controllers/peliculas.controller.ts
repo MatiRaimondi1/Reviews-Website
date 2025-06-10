@@ -9,30 +9,60 @@ import { extname } from 'path';
 import { diskStorage } from 'multer';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { PagePipe } from '../pipes/page.pipe';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
 
-/**
- * Controlador que maneja las rutas relacionadas con películas.
- */
 @Controller('api/peliculas')
 export class PeliculasController {
-
-    /**
-     * Inyecta el servicio de películas.
-     * @param peliculasService Servicio que contiene la lógica de negocio de películas.
-     */
     constructor(
         private peliculasService: PeliculasService
-    ) { }
+    ) {}
 
-    /**
-     * Obtiene una lista paginada de películas.
-     * 
-     * @param page Número de página (opcional). Por defecto, 0.
-     * @param alphabetic Ordenamiento alfabetico ascendente o descendente (Opcional)
-     * @param rating Ordenamiento por calificacion ascendente o descendente (Opcional)
-     * @returns Lista de películas.
-     */
     @Get()
+    @ApiOperation({
+        summary: 'Obtener todas las películas',
+        description: 'Obtiene una lista paginada de películas con opciones de ordenamiento'
+    })
+    @ApiQuery({
+        name: 'page',
+        required: true,
+        type: Number,
+        description: 'Número de página (comienza en 0)',
+        example: 0
+    })
+    @ApiQuery({
+        name: 'alphabetic',
+        required: false,
+        enum: ['asc', 'desc'],
+        description: 'Orden alfabético (ascendente o descendente)'
+    })
+    @ApiQuery({
+        name: 'rating',
+        required: false,
+        enum: ['asc', 'desc'],
+        description: 'Orden por calificación (ascendente o descendente)'
+    })
+    @ApiResponse({
+        status: 200,
+        description: 'Lista de películas obtenida exitosamente',
+        schema: {
+            example: [
+                {
+                    id: 1,
+                    nombre: 'El Padrino',
+                    sinopsis: 'La historia de la familia Corleone...',
+                    genero: 'Drama',
+                    fechaEstreno: '1972-03-24T00:00:00.000Z',
+                    duracion: 175,
+                    calificacion: 9.2,
+                    urlImagen: '/uploads/peliculas/123456789.jpg'
+                }
+            ]
+        }
+    })
+    @ApiResponse({
+        status: 404,
+        description: 'No se encontraron películas'
+    })
     findAll(
         @Query('page', new PagePipe()) page = 0,
         @Query('alphabetic') alphabetic?: 'asc' | 'desc',
@@ -41,17 +71,59 @@ export class PeliculasController {
         return this.peliculasService.findAll(+page, alphabetic, rating);
     }
 
-    /**
-     * Obtiene una lista paginada de peliculas por genero.
-     * 
-     * @param genero Nombre del genero de la pelicula.
-     * @param page Número de página (opcional). Por defecto, es 0.
-     * @param alphabetic Ordenamiento alfabetico ascendente o descendente (Opcional)
-     * @param rating Ordenamiento por calificacion ascendente o descendente (Opcional)
-     * @returns Lista de peliculas por genero.
-     */
+
     @Get('generos/:genero')
-    findByGenero(@Param('genero') genero: string, 
+    @ApiOperation({
+        summary: 'Obtener películas por género',
+        description: 'Obtiene una lista paginada de películas filtradas por género'
+    })
+    @ApiParam({
+        name: 'genero',
+        description: 'Nombre del género a filtrar',
+        example: 'Drama'
+    })
+    @ApiQuery({
+        name: 'page',
+        required: true,
+        type: Number,
+        description: 'Número de página (comienza en 0)',
+        example: 0
+    })
+    @ApiQuery({
+        name: 'alphabetic',
+        required: false,
+        enum: ['asc', 'desc'],
+        description: 'Orden alfabético (ascendente o descendente)'
+    })
+    @ApiQuery({
+        name: 'rating',
+        required: false,
+        enum: ['asc', 'desc'],
+        description: 'Orden por calificación (ascendente o descendente)'
+    })
+    @ApiResponse({
+        status: 200,
+        description: 'Lista de películas por género obtenida exitosamente',
+        schema: {
+            example: [
+                {
+                    id: 1,
+                    nombre: 'El Padrino',
+                    genero: 'Drama',
+                    calificacion: 9.2
+                }
+            ]
+        }
+    })
+    @ApiResponse({
+        status: 400,
+        description: 'El género no puede estar vacío'
+    })
+    @ApiResponse({
+        status: 404,
+        description: 'No se encontraron películas con el género especificado'
+    })
+    findByGenero(@Param('genero') genero: string,
         @Query('page', new PagePipe()) page = 0,
         @Query('alphabetic') alphabetic?: 'asc' | 'desc',
         @Query('rating') rating?: 'asc' | 'desc',
@@ -59,28 +131,103 @@ export class PeliculasController {
         return this.peliculasService.findByGenero(genero, +page, alphabetic, rating);
     }
 
-    /**
-    * Obtiene una película por su ID.
-    * 
-    * @param id ID de la película.
-    * @returns Película encontrada.
-    */
+
     @Get(':id')
+    @ApiOperation({
+        summary: 'Obtener una película por ID',
+        description: 'Obtiene los detalles completos de una película específica'
+    })
+    @ApiParam({
+        name: 'id',
+        description: 'ID de la película',
+        type: Number,
+        example: 1
+    })
+    @ApiResponse({
+        status: 200,
+        description: 'Película encontrada exitosamente',
+        schema: {
+            example: {
+                id: 1,
+                nombre: 'El Padrino',
+                sinopsis: 'La historia de la familia Corleone...',
+                genero: 'Drama',
+                fechaEstreno: '1972-03-24T00:00:00.000Z',
+                duracion: 175,
+                calificacion: 9.2,
+                urlImagen: '/uploads/peliculas/123456789.jpg'
+            }
+        }
+    })
+    @ApiResponse({
+        status: 404,
+        description: 'No se encontró la película con el ID especificado'
+    })
     findOne(@Param('id', ParseIntPipe) id: number) {
         return this.peliculasService.findOne(id);
     }
 
-    /**
-     * Crea una nueva película.
-     * Solo accesible por usuarios con rol "admin".
-     * 
-     * @param dto Datos para crear la película.
-     * @param imagen Archivo con formato de imagen (Opcional).
-     * @returns Película creada.
-     */
+
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Role('admin')
     @Post()
+    @ApiBearerAuth()
+    @ApiOperation({
+        summary: 'Crear una nueva película',
+        description: 'Crea una nueva película (requiere rol de admin)'
+    })
+    @ApiConsumes('multipart/form-data')
+    @ApiBody({
+        description: 'Datos de la película y su imagen',
+        schema: {
+            type: 'object',
+            properties: {
+                nombre: { type: 'string', example: 'El Padrino' },
+                sinopsis: { type: 'string', example: 'La historia de la familia Corleone...' },
+                genero: { type: 'string', example: 'Drama' },
+                fechaEstreno: { type: 'string', example: '1972-03-24' },
+                duracion: { type: 'number', example: 175 },
+                calificacion: { type: 'number', example: 9.2 },
+                imagen: {
+                    type: 'string',
+                    format: 'binary',
+                    description: 'Imagen de la película (opcional)'
+                }
+            }
+        }
+    })
+    @ApiResponse({
+        status: 201,
+        description: 'Película creada exitosamente',
+        schema: {
+            example: {
+                id: 1,
+                nombre: 'El Padrino',
+                sinopsis: 'La historia de la familia Corleone...',
+                genero: 'Drama',
+                fechaEstreno: '1972-03-24T00:00:00.000Z',
+                duracion: 175,
+                calificacion: 9.2,
+                urlImagen: '/uploads/peliculas/123456789.jpg'
+            }
+        }
+    })
+    @ApiResponse({
+        status: 400,
+        description: 'Datos de entrada inválidos'
+    })
+    @ApiResponse({
+        status: 401,
+        description: 'No autorizado (token inválido o no proporcionado)'
+    })
+    @ApiResponse({
+        status: 403,
+        description: 'No tiene permisos para realizar esta acción'
+    })
+    @ApiResponse({
+        status: 409,
+        description: 'Ya existe una película con ese nombre'
+    })
     @UseInterceptors(FileInterceptor('imagen', {
         storage: diskStorage({
             destination: './uploads',
@@ -95,13 +242,46 @@ export class PeliculasController {
         return this.peliculasService.create(dto, urlImagen);
     }
 
-    /**
-     * Busca todas las peliculas que coincidan con un cierto termino de busqueda
-     * 
-     * @param query Nombre parcial de la/s pelicula/s a buscar
-     * @returns Todas las peliculas que coincidan
-     */
+
     @Get('search/name')
+    @ApiOperation({
+        summary: 'Buscar películas por nombre',
+        description: 'Busca películas que coincidan con el término de búsqueda'
+    })
+    @ApiQuery({
+        name: 'q',
+        description: 'Término de búsqueda',
+        required: true,
+        example: 'padrino'
+    })
+    @ApiResponse({
+        status: 200,
+        description: 'Películas encontradas',
+        schema: {
+            example: [
+                {
+                    id: 1,
+                    nombre: 'El Padrino',
+                    genero: 'Drama',
+                    calificacion: 9.2
+                },
+                {
+                    id: 2,
+                    nombre: 'El Padrino: Parte II',
+                    genero: 'Drama',
+                    calificacion: 9.0
+                }
+            ]
+        }
+    })
+    @ApiResponse({
+        status: 400,
+        description: 'Debe proporcionar un término de búsqueda'
+    })
+    @ApiResponse({
+        status: 404,
+        description: 'No se encontraron películas'
+    })
     buscar(@Query('q') query: string) {
         if (!query || query.trim() === '') {
             throw new BadRequestException('Debe proporcionar un término de búsqueda');
@@ -109,31 +289,95 @@ export class PeliculasController {
         return this.peliculasService.findByKey(query);
     }
 
-    /**
-     * Actualiza una película existente.
-     * Solo accesible por usuarios con rol "admin".
-     * 
-     * @param id ID de la película a actualizar.
-     * @param body Datos nuevos de la película.
-     * @returns Película actualizada.
-     */
+
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Role('admin')
     @Put(':id')
+    @ApiBearerAuth()
+    @ApiOperation({
+        summary: 'Actualizar una película',
+        description: 'Actualiza los datos de una película existente (requiere rol de admin)'
+    })
+    @ApiParam({
+        name: 'id',
+        description: 'ID de la película a actualizar',
+        type: Number,
+        example: 1
+    })
+    @ApiBody({ type: UpdatePeliculaDto })
+    @ApiResponse({
+        status: 200,
+        description: 'Película actualizada exitosamente',
+        schema: {
+            example: {
+                id: 1,
+                nombre: 'El Padrino: Edición Especial',
+                sinopsis: 'Nueva versión remasterizada...',
+                genero: 'Drama',
+                fechaEstreno: '1972-03-24T00:00:00.000Z',
+                duracion: 180,
+                calificacion: 9.5,
+                urlImagen: '/uploads/peliculas/987654321.jpg'
+            }
+        }
+    })
+    @ApiResponse({
+        status: 400,
+        description: 'Datos de entrada inválidos'
+    })
+    @ApiResponse({
+        status: 401,
+        description: 'No autorizado (token inválido o no proporcionado)'
+    })
+    @ApiResponse({
+        status: 403,
+        description: 'No tiene permisos para realizar esta acción'
+    })
+    @ApiResponse({
+        status: 404,
+        description: 'No se encontró la película con el ID especificado'
+    })
     update(@Param('id') id: number, @Body() body: UpdatePeliculaDto) {
         return this.peliculasService.update(id, body);
     }
 
-    /**
-     * Elimina una película por su ID.
-     * Solo accesible por usuarios con rol "admin".
-     * 
-     * @param id ID de la película a eliminar.
-     * @returns resultado de la operación.
-     */
+    
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Role('admin')
     @Delete(':id')
+    @ApiBearerAuth()
+    @ApiOperation({
+        summary: 'Eliminar una película',
+        description: 'Elimina una película existente (requiere rol de admin)'
+    })
+    @ApiParam({
+        name: 'id',
+        description: 'ID de la película a eliminar',
+        type: Number,
+        example: 1
+    })
+    @ApiResponse({
+        status: 200,
+        description: 'Película eliminada exitosamente',
+        schema: {
+            example: {
+                success: true,
+                message: 'Película eliminada correctamente.'
+            }
+        }
+    })
+    @ApiResponse({
+        status: 401,
+        description: 'No autorizado (token inválido o no proporcionado)'
+    })
+    @ApiResponse({
+        status: 403,
+        description: 'No tiene permisos para realizar esta acción'
+    })
+    @ApiResponse({
+        status: 404,
+        description: 'No se encontró la película con el ID especificado'
+    })
     delete(@Param('id') id: number) {
         return this.peliculasService.delete(id);
     }

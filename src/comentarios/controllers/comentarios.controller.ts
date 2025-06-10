@@ -4,50 +4,196 @@ import { ComentariosService } from "../services/comentarios.service";
 import { JwtAuthGuard } from "src/auth/guards/jwt-auth.guard";
 import { Role } from "src/auth/decorators/role.decorator";
 import { RolesGuard } from "src/auth/guards/roles.guard";
+import { ApiBearerAuth, ApiBody, ApiForbiddenResponse, ApiNotFoundResponse, ApiOperation, ApiParam, ApiResponse } from "@nestjs/swagger";
 
-/**
- * Controlador encargado de manejar las requests relativas a los comentarios
- */
+@ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Role('user', 'admin')
 @Controller('api/comentarios')
 export class ComentariosController {
-    /**
-     * Inyecta el servicio de los comentarios
-     * @param comentariosService Servicio con la logica de negocio de los comentarios
-     */
-    constructor (private readonly comentariosService: ComentariosService) {}
+    constructor(
+        private readonly comentariosService: ComentariosService
+    ) {}
 
-    /**
-     * Crea un comentario
-     * @param reviewId ID de la review en la que se comenta
-     * @param dto el DTO definido para la creacion de un comentario
-     * @param req la request de HTTP
-     * @returns El comentario creado
-     */
     @Post(':reviewId')
+    @ApiOperation({
+        summary: 'Crear un comentario',
+        description: 'Crea un nuevo comentario en una review específica (requiere autenticación)'
+    })
+    @ApiParam({
+        name: 'reviewId',
+        description: 'ID de la review donde se publicará el comentario',
+        type: Number,
+        example: 1
+    })
+    @ApiBody({
+        type: CreateComentarioDto,
+        description: 'Contenido del comentario',
+        examples: {
+            ejemplo1: {
+                summary: 'Comentario normal',
+                value: {
+                    texto: 'Estoy totalmente de acuerdo con tu review!'
+                }
+            }
+        }
+    })
+    @ApiResponse({
+        status: 201,
+        description: 'Comentario creado exitosamente',
+        schema: {
+            example: {
+                id: 1,
+                texto: 'Estoy totalmente de acuerdo con tu review!',
+                user: {
+                    id: 1,
+                    username: 'usuario1'
+                },
+                review: {
+                    id: 1
+                }
+            }
+        }
+    })
+    @ApiNotFoundResponse({
+        description: 'Review o usuario no encontrado',
+        schema: {
+            example: {
+                statusCode: 404,
+                message: 'Review o usuario no encontrado',
+                error: 'Not Found'
+            }
+        }
+    })
+    @ApiForbiddenResponse({
+        description: 'No autorizado',
+        schema: {
+            example: {
+                statusCode: 403,
+                message: 'Forbidden resource',
+                error: 'Forbidden'
+            }
+        }
+    })
     create(@Param('reviewId') reviewId: number, @Body() dto: CreateComentarioDto, @Req() req) {
         const userId = req.user.id;
         return this.comentariosService.create(reviewId, userId, dto);
     }
 
-    /**
-     * Obtiene todos los comentarios de una review
-     * @param reviewId ID de la review cuyos comentarios se quieren obtener
-     * @returns Promesa con los comentarios obtenidos
-     */
+
     @Get(':reviewId')
+    @ApiOperation({
+        summary: 'Obtener comentarios de una review',
+        description: 'Lista todos los comentarios asociados a una review específica'
+    })
+    @ApiParam({
+        name: 'reviewId',
+        description: 'ID de la review para obtener sus comentarios',
+        type: Number,
+        example: 1
+    })
+    @ApiResponse({
+        status: 200,
+        description: 'Lista de comentarios obtenida exitosamente',
+        schema: {
+            example: [
+                {
+                    id: 1,
+                    texto: 'Excelente review, comparto tu opinión',
+                    user: {
+                        id: 1,
+                        username: 'usuario1'
+                    }
+                },
+                {
+                    id: 2,
+                    texto: 'No estoy del todo de acuerdo, pero buen análisis',
+                    user: {
+                        id: 2,
+                        username: 'usuario2'
+                    }
+                }
+            ]
+        }
+    })
+    @ApiNotFoundResponse({
+        description: 'Review no encontrada o sin comentarios',
+        schema: {
+            examples: {
+                reviewNotFound: {
+                    value: {
+                        statusCode: 404,
+                        message: 'No se encontro una review con este id',
+                        error: 'Not Found'
+                    }
+                },
+                noComments: {
+                    value: {
+                        statusCode: 404,
+                        message: 'No se encontraron comentarios para esta review',
+                        error: 'Not Found'
+                    }
+                }
+            }
+        }
+    })
     async findByReview(@Param('reviewId', ParseIntPipe) reviewId: number) {
         return this.comentariosService.findByReview(reviewId);
     }
 
-    /**
-     * Borra un comentario
-     * @param id ID del comentario a borrar
-     * @param req la request de HTTP
-     * @returns Mensaje de confirmacion de la eliminiacion
-     */
+
     @Delete(':id')
+    @ApiOperation({
+        summary: 'Eliminar un comentario',
+        description: 'Elimina un comentario específico (solo el autor o admin)'
+    })
+    @ApiParam({
+        name: 'id',
+        description: 'ID del comentario a eliminar',
+        type: Number,
+        example: 1
+    })
+    @ApiResponse({
+        status: 200,
+        description: 'Comentario eliminado exitosamente',
+        schema: {
+            example: {
+                success: true,
+                message: 'Comentario eliminado correctamente.'
+            }
+        }
+    })
+    @ApiNotFoundResponse({
+        description: 'Comentario o usuario no encontrado',
+        schema: {
+            examples: {
+                commentNotFound: {
+                    value: {
+                        statusCode: 404,
+                        message: 'Comentario no encontrado',
+                        error: 'Not Found'
+                    }
+                },
+                userNotFound: {
+                    value: {
+                        statusCode: 404,
+                        message: 'Usuario no encontrado',
+                        error: 'Not Found'
+                    }
+                }
+            }
+        }
+    })
+    @ApiForbiddenResponse({
+        description: 'No tienes permiso para eliminar este comentario',
+        schema: {
+            example: {
+                statusCode: 403,
+                message: 'No tienes permiso para eliminar este comentario',
+                error: 'Forbidden'
+            }
+        }
+    })
     remove(@Param('id') id: number, @Req() req) {
         const userId = req.user.id;
         return this.comentariosService.remove(id, userId);

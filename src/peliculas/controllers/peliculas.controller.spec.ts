@@ -2,7 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { PeliculasController } from '../controllers/peliculas.controller';
 import { PeliculasService } from '../services/peliculas.service';
 import { CreatePeliculaDto } from '../dto/create-pelicula.dto';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
 
 describe('PeliculasController', () => {
     let controller: PeliculasController;
