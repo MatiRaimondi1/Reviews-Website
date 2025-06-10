@@ -53,7 +53,7 @@ describe('ComentariosController', () => {
 
             const result = await controller.findByReview(2);
 
-            expect(mockComentariosService.findByReview).toHaveBeenCalledWith(2);
+            expect(mockComentariosService.findByReview).toHaveBeenCalledWith(2, 0);
             expect(result).toEqual(comentario);
         })
     })

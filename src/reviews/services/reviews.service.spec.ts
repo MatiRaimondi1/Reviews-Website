@@ -290,6 +290,8 @@ describe('reviewsService', () => {
             where: {
                 pelicula: { id: 2 }
             },
+            skip: 0,
+            take: 10,
             relations: ['user']
         });
         expect(result).toEqual(review);
@@ -359,6 +361,8 @@ describe('reviewsService', () => {
         expect(result).toEqual(fakeReviews);
         expect(repoReviews.find).toHaveBeenCalledWith({
             where: { user: { id: 1 } },
+            skip: 0,
+            take: 10,
             relations: ['pelicula'],
             order: { id: 'DESC' },
         });

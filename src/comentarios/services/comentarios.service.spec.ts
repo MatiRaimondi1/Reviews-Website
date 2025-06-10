@@ -79,7 +79,7 @@ describe('ComentariosService', () => {
 
             const result = await service.findByReview(3);
 
-            expect(repoComentarios.find).toHaveBeenCalledWith({where: {review: { id: 3 }},relations: ['user'],});
+            expect(repoComentarios.find).toHaveBeenCalledWith({where: {review: { id: 3 }}, skip: 0, take: 10 ,relations: ['user'],});
             expect(result).toEqual(comentario);
         })
     })

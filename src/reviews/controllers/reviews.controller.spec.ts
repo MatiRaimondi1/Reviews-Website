@@ -75,7 +75,7 @@ describe('Reviews Controller', () => {
 
         const result = await controller.findByPelicula(2);
 
-        expect(mockReviewsService.findByPelicula).toHaveBeenCalledWith(2);
+        expect(mockReviewsService.findByPelicula).toHaveBeenCalledWith(2, 0);
         expect(result).toEqual(review);
     })
 
@@ -111,7 +111,7 @@ describe('Reviews Controller', () => {
         const result = await controller.getReviewsByUsuario(1);
 
         expect(result).toEqual(fakeReviews);
-        expect(mockReviewsService.findByUsuario).toHaveBeenCalledWith(1);
+        expect(mockReviewsService.findByUsuario).toHaveBeenCalledWith(1, 0);
     });
 
     it('debería retornar la cantidad de reviews del usuario', async () => {
