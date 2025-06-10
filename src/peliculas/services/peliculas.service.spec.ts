@@ -5,6 +5,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Pelicula } from '../entities/pelicula.entity';
 import { ILike, Repository } from 'typeorm';
 import { NotFoundException } from '@nestjs/common';
+import { Genero } from 'src/generos/entities/genero.entity';
 
 const mockRepo = () => ({
     find: jest.fn(),
@@ -19,6 +20,7 @@ const mockRepo = () => ({
 describe('PeliculasService', () => {
     let service: PeliculasService;
     let repo: jest.Mocked<Repository<Pelicula>>;
+    let generoRepo: jest.Mocked<Repository<Genero>>;
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
@@ -28,11 +30,16 @@ describe('PeliculasService', () => {
                     provide: getRepositoryToken(Pelicula),
                     useFactory: mockRepo,
                 },
+                {
+                    provide: getRepositoryToken(Genero),
+                    useFactory: mockRepo,
+                }
             ],
         }).compile();
 
         service = module.get<PeliculasService>(PeliculasService);
         repo = module.get(getRepositoryToken(Pelicula));
+        generoRepo = module.get(getRepositoryToken(Genero));
     });
 
     it('findAll debe devolver 10 películas por defecto', async () => {
@@ -40,7 +47,7 @@ describe('PeliculasService', () => {
         repo.find.mockResolvedValue(result as any);
 
         const response = await service.findAll();
-        expect(repo.find).toHaveBeenCalledWith({ skip: 0, take: 10 });
+        expect(repo.find).toHaveBeenCalledWith({ order: { nombre: 'ASC' }, skip: 0, take: 10 });
         expect(response).toEqual(result);
     });
 
@@ -63,16 +70,30 @@ describe('PeliculasService', () => {
             calificacion: 4.5,
         };
         const urlImagen = 'imagen.jpg'
-        const dataConImagen = { ...dto, urlImagen };
-        const pelicula = { id: 1, ...dataConImagen };
+        const generoEntity = { id: 2, nombre: 'Drama' };
+        const expectedPelicula = {
+            id: 1,
+            ...dto,
+            urlImagen,
+            genero: generoEntity,
+        };
 
-        repo.create.mockReturnValue(pelicula as any);
-        repo.save.mockResolvedValue(pelicula as any);
+        repo.findOne.mockResolvedValue(null);
+        generoRepo.findOne.mockResolvedValue(generoEntity as Genero)
+        repo.create.mockReturnValue(expectedPelicula as any);
+        repo.save.mockResolvedValue(expectedPelicula as any);
 
         const result = await service.create(dto, urlImagen);
-        expect(repo.create).toHaveBeenCalledWith(dataConImagen);
-        expect(repo.save).toHaveBeenCalledWith(pelicula);
-        expect(result).toEqual(pelicula);
+
+        expect(repo.findOne).toHaveBeenCalledWith({ where: { nombre: dto.nombre } });
+        expect(generoRepo.findOne).toHaveBeenCalledWith({ where: { nombre: dto.genero.trim() } });
+        expect(repo.create).toHaveBeenCalledWith({
+            ...dto,
+            genero: generoEntity,
+            urlImagen,
+        });
+        expect(repo.save).toHaveBeenCalledWith(expectedPelicula);
+        expect(result).toEqual(expectedPelicula);
     });
 
     it('update debe lanzar excepción si no encuentra la película', async () => {

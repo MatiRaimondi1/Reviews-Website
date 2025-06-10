@@ -3,30 +3,67 @@ import { ReviewsService } from "../services/reviews.service";
 import { CreateReviewDto } from "../dto/create-review.dto";
 import { JwtAuthGuard } from "src/auth/guards/jwt-auth.guard";
 import { Role } from "src/auth/decorators/role.decorator";
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse } from "@nestjs/swagger";
 
-/**
- * Controlador encargado de manejar las requests relativas a las reviews
- */
 @Controller('api/reviews')
 export class ReviewsController {
+    constructor(
+        private readonly reviewsService: ReviewsService
+    ) {}
 
-    /**
-    * Inyecta el servicio de Reviews
-    * @param reviewsService Servicio que contiene la logica de negocio de Reviews
-    */
-    constructor(private readonly reviewsService: ReviewsService) { }
-
-    /**
-     * Crea una nueva review
-     * 
-     * @param peliculaId ID de la pelicula de la cual la review se trata
-     * @param dto el DTO definido para la creacion de una review
-     * @param req El objeto de la request de HTTP
-     * @returns La nueva review
-     */
     @UseGuards(JwtAuthGuard)
     @Role('user', 'admin')
     @Post(':peliculaId')
+    @ApiBearerAuth()
+    @ApiOperation({
+        summary: 'Crear una nueva review',
+        description: 'Crea una nueva review para una película. Puede ser individual o grupal (requiere autenticación)'
+    })
+    @ApiParam({
+        name: 'peliculaId',
+        description: 'ID de la película a reseñar',
+        type: Number,
+        example: 1
+    })
+    @ApiResponse({
+        status: 201,
+        description: 'Review creada exitosamente',
+        schema: {
+            example: {
+                id: 1,
+                texto: 'Excelente película, muy recomendable',
+                puntuacion: 9,
+                user: {
+                    id: 1,
+                    username: 'usuario1'
+                },
+                pelicula: {
+                    id: 1,
+                    nombre: 'El Padrino'
+                }
+            }
+        }
+    })
+    @ApiResponse({
+        status: 400,
+        description: 'Datos de entrada inválidos'
+    })
+    @ApiResponse({
+        status: 401,
+        description: 'No autorizado (token inválido o no proporcionado)'
+    })
+    @ApiResponse({
+        status: 403,
+        description: 'No tiene permisos para realizar esta acción'
+    })
+    @ApiResponse({
+        status: 404,
+        description: 'Usuario, película o grupo no encontrado'
+    })
+    @ApiResponse({
+        status: 409,
+        description: 'Ya existe una review para esta película por este usuario/grupo'
+    })
     create(
         @Param('peliculaId', ParseIntPipe) peliculaId: number,
         @Body() dto: CreateReviewDto,
@@ -38,36 +75,123 @@ export class ReviewsController {
         return this.reviewsService.create(dto, userId, peliculaId, grupoId);
     }
 
-    /**
-     * Obtiene una promesa con todas las reviews de una pelicula en especifico, junto con el usuario
-     * que la publico, en base a la ID de la pelicula
-     * 
-     * @param peliculaId ID de la pelicula a buscar
-     * @returns Promesa con las reviews
-     */
+
     @Get(':peliculaId')
+    @ApiOperation({
+        summary: 'Obtener reviews de una película',
+        description: 'Obtiene todas las reviews de una película específica'
+    })
+    @ApiParam({
+        name: 'peliculaId',
+        description: 'ID de la película',
+        type: Number,
+        example: 1
+    })
+    @ApiResponse({
+        status: 200,
+        description: 'Lista de reviews obtenida exitosamente',
+        schema: {
+            example: [
+                {
+                    id: 1,
+                    texto: 'Excelente película',
+                    puntuacion: 9,
+                    user: {
+                        id: 1,
+                        username: 'usuario1'
+                    }
+                },
+                {
+                    id: 2,
+                    texto: 'Muy buena',
+                    puntuacion: 8,
+                    user: {
+                        id: 2,
+                        username: 'usuario2'
+                    }
+                }
+            ]
+        }
+    })
+    @ApiResponse({
+        status: 404,
+        description: 'No se encontraron reviews para esta película'
+    })
     findByPelicula(@Param('peliculaId', ParseIntPipe) peliculaId: number) {
         return this.reviewsService.findByPelicula(peliculaId);
     }
 
-    /**
-     * Obtiene todas las reviews de un usuario
-     * 
-     * @param userId ID del usuario a buscar
-     * @returns Todas las reviews que hizo un usuario especifico
-     */
+
     @Get('user/:userId')
+    @ApiOperation({
+        summary: 'Obtener reviews de un usuario',
+        description: 'Obtiene todas las reviews realizadas por un usuario específico'
+    })
+    @ApiParam({
+        name: 'userId',
+        description: 'ID del usuario',
+        type: Number,
+        example: 1
+    })
+    @ApiResponse({
+        status: 200,
+        description: 'Lista de reviews del usuario obtenida exitosamente',
+        schema: {
+            example: [
+                {
+                    id: 1,
+                    texto: 'Me encantó esta película',
+                    puntuacion: 9,
+                    pelicula: {
+                        id: 1,
+                        nombre: 'El Padrino'
+                    }
+                },
+                {
+                    id: 2,
+                    texto: 'Buena pero no excelente',
+                    puntuacion: 7,
+                    pelicula: {
+                        id: 2,
+                        nombre: 'El Padrino: Parte II'
+                    }
+                }
+            ]
+        }
+    })
+    @ApiResponse({
+        status: 404,
+        description: 'El usuario no tiene reviews o no existe'
+    })
     getReviewsByUsuario(@Param('userId', ParseIntPipe) userId: number) {
         return this.reviewsService.findByUsuario(userId);
     }
 
-    /**
-     * Obtiene la cantidad total de reviews que hizo un usuario
-     * 
-     * @param userId ID del usuario a buscar
-     * @returns Cantidad total de reviews que hizo un usuario
-     */
+
     @Get('user/:userId/count')
+    @ApiOperation({
+        summary: 'Contar reviews de un usuario',
+        description: 'Obtiene la cantidad de reviews realizadas por un usuario'
+    })
+    @ApiParam({
+        name: 'userId',
+        description: 'ID del usuario',
+        type: Number,
+        example: 1
+    })
+    @ApiResponse({
+        status: 200,
+        description: 'Cantidad de reviews obtenida exitosamente',
+        schema: {
+            example: {
+                cantidad: 5
+            }
+        }
+    })
+    @ApiResponse({
+        status: 404,
+        description: 'El usuario no tiene reviews o no existe'
+    })
     async countReviewsByUsuario(@Param('userId', ParseIntPipe) userId: number) {
         return { cantidad: await this.reviewsService.countByUsuario(userId) };
     }
@@ -75,6 +199,44 @@ export class ReviewsController {
     @UseGuards(JwtAuthGuard)
     @Role('user', 'admin')
     @Patch(':id')
+    @ApiBearerAuth()
+    @ApiOperation({
+        summary: 'Editar una review',
+        description: 'Edita el texto o puntuación de una review existente (solo el autor o admin)'
+    })
+    @ApiParam({
+        name: 'id',
+        description: 'ID de la review a editar',
+        type: Number,
+        example: 1
+    })
+    @ApiResponse({
+        status: 200,
+        description: 'Review actualizada exitosamente',
+        schema: {
+            example: {
+                id: 1,
+                texto: 'Texto actualizado de la review',
+                puntuacion: 8,
+            }
+        }
+    })
+    @ApiResponse({
+        status: 400,
+        description: 'Datos inválidos o no eres el autor'
+    })
+    @ApiResponse({
+        status: 401,
+        description: 'No autorizado (token inválido o no proporcionado)'
+    })
+    @ApiResponse({
+        status: 403,
+        description: 'No tiene permisos para realizar esta acción'
+    })
+    @ApiResponse({
+        status: 404,
+        description: 'Review no encontrada'
+    })
     async edit(
         @Param('id', ParseIntPipe) id: number,
         @Body() updateData: { texto?: string; puntuacion?: number },
@@ -84,16 +246,47 @@ export class ReviewsController {
         return this.reviewsService.edit(id, userId, updateData);
     }
 
-    /**
-     * Borra una review
-     * 
-     * @param id ID de la review a borrar
-     * @param req El objeto de la request de HTTP
-     * @returns 'true' si la eliminacion fue exitosa
-     */
+
     @UseGuards(JwtAuthGuard)
     @Role('user', 'admin')
     @Delete(':id')
+    @ApiBearerAuth()
+    @ApiOperation({
+        summary: 'Eliminar una review',
+        description: 'Elimina una review existente (solo el autor o admin)'
+    })
+    @ApiParam({
+        name: 'id',
+        description: 'ID de la review a eliminar',
+        type: Number,
+        example: 1
+    })
+    @ApiResponse({
+        status: 200,
+        description: 'Review eliminada exitosamente',
+        schema: {
+            example: {
+                success: true,
+                message: 'Review eliminada correctamente'
+            }
+        }
+    })
+    @ApiResponse({
+        status: 400,
+        description: 'No eres el autor de esta review'
+    })
+    @ApiResponse({
+        status: 401,
+        description: 'No autorizado (token inválido o no proporcionado)'
+    })
+    @ApiResponse({
+        status: 403,
+        description: 'No tiene permisos para realizar esta acción'
+    })
+    @ApiResponse({
+        status: 404,
+        description: 'Review no encontrada'
+    })
     delete(@Param('id', ParseIntPipe) id: number, @Request() req) {
         const user = req.user.id;
         return this.reviewsService.delete(id, user);

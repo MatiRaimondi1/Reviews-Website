@@ -2,7 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { PeliculasController } from '../controllers/peliculas.controller';
 import { PeliculasService } from '../services/peliculas.service';
 import { CreatePeliculaDto } from '../dto/create-pelicula.dto';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
 
 describe('PeliculasController', () => {
     let controller: PeliculasController;
@@ -37,7 +36,7 @@ describe('PeliculasController', () => {
 
             const response = await controller.findAll(2);
 
-            expect(mockPeliculasService.findAll).toHaveBeenCalledWith(2);
+            expect(mockPeliculasService.findAll).toHaveBeenCalledWith(2, undefined, undefined);
             expect(response).toEqual(result);
         });
 
@@ -47,7 +46,7 @@ describe('PeliculasController', () => {
 
             const response = await controller.findAll(undefined);
 
-            expect(mockPeliculasService.findAll).toHaveBeenCalledWith(0);
+            expect(mockPeliculasService.findAll).toHaveBeenCalledWith(0, undefined, undefined);
             expect(response).toEqual(result);
         });
     });
