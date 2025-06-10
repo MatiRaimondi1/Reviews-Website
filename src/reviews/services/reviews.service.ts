@@ -118,11 +118,16 @@ export class ReviewsService {
      * @param userId ID del usuario a buscar
      * @returns Promesa con todas las reviews que hizo un usuario en especifico sin importar la pelicula
      */
-    async findByUsuario(userId: number) {
+    async findByUsuario(userId: number, page = 0) {
+        const limit = 10;
+        const offset = page * limit;
+
         const reviews = await this.reviewsRepo.find({
             where: {
                 user: { id: userId },
             },
+            skip: offset,
+            take: limit,
             relations: ['pelicula'],
             order: { id: 'DESC' },
         });

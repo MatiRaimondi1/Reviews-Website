@@ -166,8 +166,11 @@ export class ReviewsController {
         status: 404,
         description: 'El usuario no tiene reviews o no existe'
     })
-    getReviewsByUsuario(@Param('userId', ParseIntPipe) userId: number) {
-        return this.reviewsService.findByUsuario(userId);
+    getReviewsByUsuario(
+        @Param('userId', ParseIntPipe) userId: number,
+        @Query('page') page = 0,
+    ) {
+        return this.reviewsService.findByUsuario(userId, page);
     }
 
 
