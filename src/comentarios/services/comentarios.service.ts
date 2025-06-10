@@ -48,6 +48,7 @@ export class ComentariosService {
     /**
      * Obtiene todos los comentarios de una review
      * @param reviewId ID de la review cuyos comentarios se quieren obtener
+     * @param page Número de página (comienza en 0). Por defecto, es 0.
      * @returns Promesa con los comentarios obtenidos
      */
     async findByReview(reviewId: number, page = 0) {

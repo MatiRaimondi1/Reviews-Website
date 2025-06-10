@@ -90,6 +90,7 @@ export class ReviewsService {
      * Logica de la busqueda de reviews sobre una pelicula especifica
      * 
      * @param peliculaId ID de la pelicula a buscar
+     * @param page Número de página (comienza en 0). Por defecto, es 0.
      * @returns Promesa con las reviews encontradas junto a los usuarios que las publicaron
      */
     async findByPelicula(peliculaId: number, page = 0) {
@@ -116,6 +117,7 @@ export class ReviewsService {
      * Logica para buscar todas las reviews que hizo un usuario en especifico
      * 
      * @param userId ID del usuario a buscar
+     * @param page Número de página (comienza en 0). Por defecto, es 0.
      * @returns Promesa con todas las reviews que hizo un usuario en especifico sin importar la pelicula
      */
     async findByUsuario(userId: number, page = 0) {
