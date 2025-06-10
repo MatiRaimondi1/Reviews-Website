@@ -50,7 +50,10 @@ export class ComentariosService {
      * @param reviewId ID de la review cuyos comentarios se quieren obtener
      * @returns Promesa con los comentarios obtenidos
      */
-    async findByReview(reviewId: number) {
+    async findByReview(reviewId: number, page = 0) {
+        const limit = 10;
+        const offset = page * limit;
+
         const review = await this.reviewsRepo.findOneBy({ id: reviewId });
         
         if (!review) {
@@ -61,6 +64,8 @@ export class ComentariosService {
             where: {
                 review: { id: reviewId }
             },
+            skip: offset,
+            take: limit,
             relations: ['user'],
         });
         

@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Query, Req, UseGuards } from "@nestjs/common";
 import { CreateComentarioDto } from "../dto/create-comentario.dto";
 import { ComentariosService } from "../services/comentarios.service";
 import { JwtAuthGuard } from "src/auth/guards/jwt-auth.guard";
@@ -137,8 +137,11 @@ export class ComentariosController {
             }
         }
     })
-    async findByReview(@Param('reviewId', ParseIntPipe) reviewId: number) {
-        return this.comentariosService.findByReview(reviewId);
+    async findByReview(
+        @Param('reviewId', ParseIntPipe) reviewId: number,
+        @Query('page') page = 0,
+    ) {
+        return this.comentariosService.findByReview(reviewId, page);
     }
 
 
