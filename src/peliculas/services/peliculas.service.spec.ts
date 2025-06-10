@@ -4,7 +4,7 @@ import { PeliculasService } from './peliculas.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Pelicula } from '../entities/pelicula.entity';
 import { ILike, Repository } from 'typeorm';
-import { NotFoundException } from '@nestjs/common';
+import { ConflictException, NotFoundException } from '@nestjs/common';
 import { Genero } from 'src/generos/entities/genero.entity';
 
 const mockRepo = () => ({
@@ -50,6 +50,9 @@ describe('PeliculasService', () => {
         expect(repo.find).toHaveBeenCalledWith({ order: { nombre: 'ASC' }, skip: 0, take: 10 });
         expect(response).toEqual(result);
     });
+    it('si findAll no encuentra nada, debe arrojar un NotFoundException', () =>{
+        expect(service.findAll()).rejects.toThrow(NotFoundException);
+    })
 
     it('findOne debe retornar una película por ID', async () => {
         const pelicula = { id: 1, nombre: 'Matrix' };
@@ -59,6 +62,9 @@ describe('PeliculasService', () => {
         expect(repo.findOneBy).toHaveBeenCalledWith({ id: 1 });
         expect(result).toEqual(pelicula);
     });
+    it('si findOne no encuentra la pelicula debe arrojar NotFoundException', ()=>{
+        expect(service.findOne(1)).rejects.toThrow(NotFoundException);
+    })
 
     it('create debe guardar una nueva película', async () => {
         const dto = {
@@ -95,6 +101,27 @@ describe('PeliculasService', () => {
         expect(repo.save).toHaveBeenCalledWith(expectedPelicula);
         expect(result).toEqual(expectedPelicula);
     });
+    it('si la pelicula ya existe, debe arrojar ConflictException', ()=>{
+        const dto = {
+            nombre: 'Nueva',
+            sinopsis: 'Sinopsis',
+            genero: 'Drama',
+            fechaEstreno: new Date(),
+            duracion: 120,
+            calificacion: 4.5,
+        };
+        const urlImagen = 'imagen.jpg'
+        const generoEntity = { id: 2, nombre: 'Drama' };
+        const expectedPelicula = {
+            id: 1,
+            ...dto,
+            urlImagen,
+            genero: generoEntity,
+        };
+        repo.findOne.mockResolvedValue(expectedPelicula as any);
+
+        expect(service.create(dto, urlImagen,)).rejects.toThrow(ConflictException)
+    })
 
     it('update debe lanzar excepción si no encuentra la película', async () => {
         repo.findOneBy.mockResolvedValue(null);
@@ -110,6 +137,10 @@ describe('PeliculasService', () => {
         expect(repo.delete).toHaveBeenCalledWith(1);
         expect(result).toStrictEqual(expectedResult);
     });
+    it('si no se encuentra una pelicula para eliminar, debe lanzar NotFoundException', ()=>{
+        repo.delete.mockResolvedValue({affected: 0} as any)
+        expect(service.delete(1)).rejects.toThrow(NotFoundException);
+    })
 
     it('debería devolver películas que coincidan con la clave', async () => {
         const mockPeliculas = [
@@ -129,4 +160,7 @@ describe('PeliculasService', () => {
         });
         expect(result).toEqual(mockPeliculas);
     });
+    it('si no se encontraron peliculas, deberia lanzar NotFoundException', ()=>{
+        expect(service.findByKey('bat')).rejects.toThrow(NotFoundException)
+    })
 });
