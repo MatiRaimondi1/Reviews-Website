@@ -4,7 +4,7 @@ import { ComentariosService } from "../services/comentarios.service";
 import { JwtAuthGuard } from "src/auth/guards/jwt-auth.guard";
 import { Role } from "src/auth/decorators/role.decorator";
 import { RolesGuard } from "src/auth/guards/roles.guard";
-import { ApiBearerAuth, ApiBody, ApiForbiddenResponse, ApiNotFoundResponse, ApiOperation, ApiParam, ApiResponse } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiBody, ApiForbiddenResponse, ApiNotFoundResponse, ApiOperation, ApiParam, ApiQuery, ApiResponse } from "@nestjs/swagger";
 
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -13,7 +13,7 @@ import { ApiBearerAuth, ApiBody, ApiForbiddenResponse, ApiNotFoundResponse, ApiO
 export class ComentariosController {
     constructor(
         private readonly comentariosService: ComentariosService
-    ) {}
+    ) { }
 
     @Post(':reviewId')
     @ApiOperation({
@@ -91,6 +91,13 @@ export class ComentariosController {
         description: 'ID de la review para obtener sus comentarios',
         type: Number,
         example: 1
+    })
+    @ApiQuery({
+        name: 'page',
+        required: false,
+        type: Number,
+        description: 'Número de página (comienza en 0)',
+        example: 0
     })
     @ApiResponse({
         status: 200,

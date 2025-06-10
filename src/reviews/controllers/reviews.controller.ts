@@ -3,7 +3,7 @@ import { ReviewsService } from "../services/reviews.service";
 import { CreateReviewDto } from "../dto/create-review.dto";
 import { JwtAuthGuard } from "src/auth/guards/jwt-auth.guard";
 import { Role } from "src/auth/decorators/role.decorator";
-import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiQuery, ApiResponse } from "@nestjs/swagger";
 
 @Controller('api/reviews')
 export class ReviewsController {
@@ -87,6 +87,13 @@ export class ReviewsController {
         type: Number,
         example: 1
     })
+    @ApiQuery({
+            name: 'page',
+            required: false,
+            type: Number,
+            description: 'Número de página (comienza en 0)',
+            example: 0
+        })
     @ApiResponse({
         status: 200,
         description: 'Lista de reviews obtenida exitosamente',
@@ -135,6 +142,13 @@ export class ReviewsController {
         description: 'ID del usuario',
         type: Number,
         example: 1
+    })
+    @ApiQuery({
+        name: 'page',
+        required: false,
+        type: Number,
+        description: 'Número de página (comienza en 0)',
+        example: 0
     })
     @ApiResponse({
         status: 200,
