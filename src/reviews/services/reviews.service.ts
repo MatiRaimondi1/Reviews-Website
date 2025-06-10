@@ -92,13 +92,24 @@ export class ReviewsService {
      * @param peliculaId ID de la pelicula a buscar
      * @returns Promesa con las reviews encontradas junto a los usuarios que las publicaron
      */
-    async findByPelicula(peliculaId: number) {
-        return this.reviewsRepo.find({
+    async findByPelicula(peliculaId: number, page = 0) {
+        const limit = 10;
+        const offset = page * limit;
+
+        const reviews = await this.reviewsRepo.find({
             where: {
                 pelicula: { id: peliculaId }
             },
+            skip: offset,
+            take: limit,
             relations: ['user'],
         });
+
+        if (!reviews || reviews.length === 0) {
+            throw new NotFoundException("No se encontraron reviews para esta pelicula.")
+        }
+
+        return reviews;
     }
 
     /**

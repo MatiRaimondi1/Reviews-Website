@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Request, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, Request, UseGuards } from "@nestjs/common";
 import { ReviewsService } from "../services/reviews.service";
 import { CreateReviewDto } from "../dto/create-review.dto";
 import { JwtAuthGuard } from "src/auth/guards/jwt-auth.guard";
@@ -117,8 +117,11 @@ export class ReviewsController {
         status: 404,
         description: 'No se encontraron reviews para esta película'
     })
-    findByPelicula(@Param('peliculaId', ParseIntPipe) peliculaId: number) {
-        return this.reviewsService.findByPelicula(peliculaId);
+    findByPelicula(
+        @Param('peliculaId', ParseIntPipe) peliculaId: number,
+        @Query('page') page = 0,
+    ) {
+        return this.reviewsService.findByPelicula(peliculaId, page);
     }
 
 
