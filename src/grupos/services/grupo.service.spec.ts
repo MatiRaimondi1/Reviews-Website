@@ -1,11 +1,11 @@
-import { Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 import { Grupo } from '../entities/grupo.entity';
 import { GrupoService } from './grupo.service';
 import { User } from 'src/users/entities/user.entity';
 import { MembresiaGrupo } from '../entities/membresiaGrupo.entity';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { ForbiddenException, NotFoundException } from '@nestjs/common';
+import { ConflictException, ForbiddenException, NotFoundException } from '@nestjs/common';
 
 const mockRepo = () => ({
   find: jest.fn(),
@@ -94,6 +94,24 @@ describe('GrupoService', () => {
     expect(repoMembresias.save).toHaveBeenCalledWith(membresiaGrupo);
     expect(result).toEqual({ mensaje: 'Te uniste al grupo correctamente' });
   });
+  it('Si no se encuentra el Usuario, debe lanzar NotFoundException', async () =>{
+    await expect(service.join(1, 2)).rejects.toThrow(NotFoundException);
+  })
+  it('Si el usuario ya tiene grupo, debe lanzar ConflictException', async ()=>{
+    const user = { id: 2, nombre: 'Juan' };
+    const membresiaGrupo = { id: 3}
+
+    repoUsers.findOneBy.mockResolvedValue(user as any);
+    repoMembresias.findOne.mockResolvedValue(membresiaGrupo as any);
+
+    await expect(service.join(1, 2)).rejects.toThrow(ConflictException)
+  })
+  it('Si no se encuentra el grupo, debe lanzar NotFoundException', async () =>{
+    const user = { id: 2, nombre: 'Juan' };
+    repoUsers.findOneBy.mockResolvedValue(user as any);
+
+    await expect(service.join(1, 2)).rejects.toThrow(NotFoundException);
+  })
 
   it('Debe obtener todos los grupos', async () => {
     const grupo = {
@@ -107,6 +125,9 @@ describe('GrupoService', () => {
 
     expect(result).toEqual(grupo);
   });
+  it('Si no se encuentran grupos, debe arrojar NotFoundException', async () =>{
+    await expect(service.getAll()).rejects.toThrow(NotFoundException)
+  })
 
   it('Debe obtener un solo grupo mediante su Id', async () => {
     const grupo = {
@@ -121,6 +142,9 @@ describe('GrupoService', () => {
     expect(repoGrupos.findOneBy).toHaveBeenCalledWith({ id: 1 });
     expect(result).toEqual(grupo);
   });
+  it('Si no se encontro al grupo, debe arrojar NotFoundException', async () =>{
+    await expect(service.getOneById(1)).rejects.toThrow(NotFoundException);
+  })
 
   it('Debe obtener los miembros de un grupo', async () => {
     let grupo = {
@@ -144,6 +168,9 @@ describe('GrupoService', () => {
 
     expect(result).toEqual([{ id: 2, nombre: 'Juan', rol: 'miembro' }]);
   });
+  it('Si no se encontro al grupo, debe arrojar NotFoundException', async () =>{
+    await expect(service.getMembers(1)).rejects.toThrow(NotFoundException);
+  })
 
   it('Debería devolver la cantidad de miembros del grupo', async () => {
     const fakeGrupo = {
@@ -156,6 +183,9 @@ describe('GrupoService', () => {
     const result = await service.countMembers(1);
     expect(result).toBe(3);
   });
+  it('Si no se encontro al grupo, debe arrojar NotFoundException', async () =>{
+    await expect(service.countMembers(1)).rejects.toThrow(NotFoundException);
+  })
 
   it('Debería permitir salir del grupo si hay más miembros', async () => {
     const relacionMock = {
@@ -182,7 +212,6 @@ describe('GrupoService', () => {
 
     expect(result).toEqual({ mensaje: 'Saliste del grupo correctamente' });
   });
-
   it('Debería eliminar el grupo si era el último miembro', async () => {
     const relacionMock = {
       grupo: { id: 1 },
@@ -203,7 +232,6 @@ describe('GrupoService', () => {
         'Saliste del grupo. El grupo fue eliminado porque no tenía más miembros.',
     });
   });
-
   it('Debería lanzar error si el usuario no está en el grupo', async () => {
     repoMembresias.findOne.mockResolvedValue(null);
 
