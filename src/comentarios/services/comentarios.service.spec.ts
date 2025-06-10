@@ -5,6 +5,7 @@ import { Comentario } from "../entities/comentario.entity";
 import { ComentariosService } from "./comentarios.service"
 import { Test, TestingModule } from "@nestjs/testing";
 import { getRepositoryToken } from "@nestjs/typeorm";
+import { ForbiddenException, NotFoundException } from "@nestjs/common";
 
 const mockRepo = () => ({
     find: jest.fn(),
@@ -67,6 +68,10 @@ describe('ComentariosService', () => {
             expect(repoComentarios.save).toHaveBeenCalledWith(comentario);
             expect(result).toEqual(comentario);
         })
+        it('si no existe la review o el usuario, debe lanzar NotFoundException', async ()=>{
+            const dto = {texto: 'comentario'};
+            await expect(service.create(1, 2, dto)).rejects.toThrow(NotFoundException)
+        })
     })
 
     describe('findByReview', () =>{
@@ -81,6 +86,15 @@ describe('ComentariosService', () => {
 
             expect(repoComentarios.find).toHaveBeenCalledWith({where: {review: { id: 3 }}, skip: 0, take: 10 ,relations: ['user'],});
             expect(result).toEqual(comentario);
+        })
+        it('si no se encuentra la review especificada, debe lanzar NotFoundException', async () =>{
+            await expect(service.findByReview(3)).rejects.toThrow(new NotFoundException('No se encontro una review con este id.'));
+        })
+        it('si la review no teiene comentarios, debe lanzar NotFoundException', async () =>{
+            const review = {id: 3};
+            repoReviews.findOneBy.mockResolvedValue(review as any);
+
+            await expect(service.findByReview(3)).rejects.toThrow(new NotFoundException('No se encontraron comentarios para esta review.'));
         })
     })
 
@@ -111,6 +125,26 @@ describe('ComentariosService', () => {
 
             expect(repoComentarios.remove).toHaveBeenCalledWith(comentario);
             expect(result).toEqual({ success: true, message: 'Comentario eliminado correctamente.' });
+        })
+        it('Si no se encuentra el comentario, debe lanzar NotFoundException', async () =>{
+            await expect(service.remove(1, 3)).rejects.toThrow(new NotFoundException("Comentario no encontrado."));
+        })
+        it('Si no se encuentra el usuario, debe lanzar NotFoundException', async () =>{
+            const comentario = {id: 1, texto: 'comentario',};
+            repoComentarios.findOne.mockResolvedValue(comentario as any)
+
+            await expect(service.remove(1, 3)).rejects.toThrow(new NotFoundException("Usuario no encontrado."))
+        })
+        it('Si no es el autor del comentario y no es admin, debe lanzar ForbiddenException', async () =>{
+            const user = {id: 2, nombre: 'pablo'};
+            const otroUser = {id: 4, nombre: 'noPablo'}
+            const comentario = {id: 1, texto: 'comentario', user: user};
+
+            repoComentarios.findOne.mockResolvedValue(comentario as any);
+            repoUsers.findOneBy.mockResolvedValue(otroUser as any);
+            repoComentarios.remove.mockResolvedValue(comentario as any);
+
+            await expect(service.remove(1, 4)).rejects.toThrow(ForbiddenException);
         })
     })
 })
