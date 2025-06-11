@@ -368,6 +368,36 @@ describe('reviewsService', () => {
         });
     });
 
+    it('debería retornar todas las reviews del grupo si existen', async () => {
+        const fakeReviews = [
+            {
+                id: 1,
+                texto: 'Buena',
+                puntuacion: 4,
+                userId: 1,
+                peliculaId: 1,
+                grupoId: 1,
+                pelicula: { id: 1, nombre: 'Matrix' },
+                user: { id: 1, username: 'testuser' },
+                grupo: { id: 1 },
+                comentarios: [],
+            }
+        ] as unknown as Review[];
+
+        repoReviews.find.mockResolvedValue(fakeReviews);
+
+        const result = await service.findByGrupo(1);
+
+        expect(result).toEqual(fakeReviews);
+        expect(repoReviews.find).toHaveBeenCalledWith({
+            where: { grupo: { id: 1 } },
+            skip: 0,
+            take: 10,
+            relations: ['pelicula', 'grupo'],
+            order: { id: 'DESC' },
+        });
+    });
+
     it('debería retornar la cantidad de reviews del usuario si existen', async () => {
         const mockReviews = [
             { id: 1, user: { id: 1 }, pelicula: {}, texto: 'Review 1' },

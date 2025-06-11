@@ -142,6 +142,34 @@ export class ReviewsService {
     }
 
     /**
+     * Logica para buscar todas las reviews que hizo un grupo en especifico
+     * 
+     * @param grupoId ID del grupo a buscar
+     * @param page Número de página (comienza en 0). Por defecto, es 0.
+     * @returns Promesa con todas las reviews que hizo un grupo en especifico sin importar la pelicula
+     */
+    async findByGrupo(grupoId: number, page = 0) {
+        const limit = 10;
+        const offset = page * limit;
+
+        const reviews = await this.reviewsRepo.find({
+            where: {
+                grupo: { id: grupoId },
+            },
+            skip: offset,
+            take: limit,
+            relations: ['pelicula', 'grupo'],
+            order: { id: 'DESC' },
+        });
+
+        if (!reviews || reviews.length === 0) {
+            throw new NotFoundException("Este grupo no hizo ninguna review.")
+        }
+
+        return reviews;
+    }
+
+    /**
      * Cuenta la cantidad de reviews que hizo un usuario en especifico
      * 
      * @param userId ID del usuario a buscar

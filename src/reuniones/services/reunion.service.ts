@@ -46,7 +46,14 @@ export class ReunionService {
             link: dto.link,
             grupo,
         });
-        return this.reunionRepo.save(reunion);
+
+        const savedReunion = await this.reunionRepo.save(reunion);
+        grupo.reunion = savedReunion;
+        grupo.reunionId = savedReunion.id;
+
+        await this.grupoRepo.save(grupo);
+
+        return savedReunion;
     }
 
     /**

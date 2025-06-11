@@ -187,6 +187,53 @@ export class ReviewsController {
         return this.reviewsService.findByUsuario(userId, page);
     }
 
+    
+    @Get('grupo/:grupoId')
+    @ApiOperation({
+        summary: 'Obtener reviews de un grupo',
+        description: 'Obtiene todas las reviews realizadas por un grupo específico'
+    })
+    @ApiParam({
+        name: 'grupoId',
+        description: 'ID del grupo',
+        type: Number,
+        example: 1
+    })
+    @ApiQuery({
+        name: 'page',
+        required: false,
+        type: Number,
+        description: 'Número de página (comienza en 0)',
+        example: 0
+    })
+    @ApiResponse({
+        status: 200,
+        description: 'Lista de reviews del grupo obtenida exitosamente',
+        schema: {
+            example: [
+                {
+                    id: 1,
+                    texto: 'Nos encantó esta película',
+                    puntuacion: 9,
+                    pelicula: {
+                        id: 1,
+                        nombre: 'El Padrino'
+                    }
+                }
+            ]
+        }
+    })
+    @ApiResponse({
+        status: 404,
+        description: 'El grupo no tiene reviews o no existe'
+    })
+    getReviewsByGrupo(
+        @Param('grupoId', ParseIntPipe) grupoId: number,
+        @Query('page') page = 0,
+    ) {
+        return this.reviewsService.findByGrupo(grupoId, page);
+    }
+
 
     @Get('user/:userId/count')
     @ApiOperation({
