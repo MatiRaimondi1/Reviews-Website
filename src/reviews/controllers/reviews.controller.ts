@@ -235,6 +235,31 @@ export class ReviewsController {
     }
 
 
+    @Get('pelicula/:movieId/count')
+    @ApiOperation({
+        summary: 'Contar reviews de una pelicula',
+        description: 'Obtiene la cantidad de reviews de una pelicula'
+    })
+    @ApiParam({
+        name: 'movieId',
+        description: 'ID de la pelicula',
+        type: Number,
+        example: 1
+    })
+    @ApiResponse({
+        status: 200,
+        description: 'Cantidad de reviews obtenida exitosamente',
+        schema: {
+            example: {
+                cantidad: 5
+            }
+        }
+    })
+    async countByMovie(@Param('movieId', ParseIntPipe) movieId: number) {
+        return { cantidad: await this.reviewsService.countByMovie(movieId) };
+    }
+
+
     @Get('user/:userId/count')
     @ApiOperation({
         summary: 'Contar reviews de un usuario',
@@ -254,10 +279,6 @@ export class ReviewsController {
                 cantidad: 5
             }
         }
-    })
-    @ApiResponse({
-        status: 404,
-        description: 'El usuario no tiene reviews o no existe'
     })
     async countReviewsByUsuario(@Param('userId', ParseIntPipe) userId: number) {
         return { cantidad: await this.reviewsService.countByUsuario(userId) };

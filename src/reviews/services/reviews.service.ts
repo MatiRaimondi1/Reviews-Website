@@ -196,7 +196,7 @@ export class ReviewsService {
    * @param userId ID del usuario a buscar
    * @returns Promesa con la cantidad de reviews que hizo un usuario en especifico sin importar la pelicula
    */
-  async countByUsuario(userId: number): Promise<number> {
+  async countByUsuario(userId: number) {
     const reviews = await this.reviewsRepo.find({
       where: {
         user: { id: userId },
@@ -206,7 +206,29 @@ export class ReviewsService {
     });
 
     if (!reviews || reviews.length === 0) {
-      throw new NotFoundException('Este usuario no hizo ninguna review.');
+      return 0
+    }
+
+    return reviews.length;
+  }
+
+  /**
+   * Cuenta la cantidad de reviews que hizo un usuario en especifico
+   *
+   * @param movieId ID de la pelicula a buscar
+   * @returns Promesa con la cantidad de reviews de una pelicula
+   */
+  async countByMovie(movieId: number) {
+    const reviews = await this.reviewsRepo.find({
+      where: {
+        pelicula: {
+          id: movieId
+        }
+      }
+    });
+
+    if (!reviews || reviews.length === 0) {
+      return 0
     }
 
     return reviews.length;

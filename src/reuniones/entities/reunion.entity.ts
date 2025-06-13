@@ -15,7 +15,7 @@ export class Reunion {
     @Column()
     grupoId: number;
 
-    @OneToOne(() => Grupo, grupo => grupo.reunion, { eager: false, onDelete: 'CASCADE' })
+    @OneToOne(() => Grupo, grupo => grupo.reunion, { nullable: false })
     @JoinColumn({ name: 'grupoId' })
     grupo: Grupo;
 }

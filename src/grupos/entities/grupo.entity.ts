@@ -26,7 +26,7 @@ export class Grupo {
     @Column({ nullable: true })
     reunionId: number;
 
-    @OneToOne(() => Reunion, reunion => reunion.grupo, { eager: false, onDelete: 'CASCADE' })
-    @JoinColumn({ name: 'reunionId '})
+    @OneToOne(() => Reunion, reunion => reunion.grupo, { eager: false, onDelete: 'SET NULL', nullable: true })
+    @JoinColumn({ name: 'reunionId'})
     reunion: Reunion;
 }
