@@ -6,6 +6,7 @@ import { MembresiaGrupo } from '../entities/membresiaGrupo.entity';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { ConflictException, ForbiddenException, NotFoundException } from '@nestjs/common';
+import { Reunion } from 'src/reuniones/entities/reunion.entity';
 
 const mockRepo = () => ({
   find: jest.fn(),
@@ -24,6 +25,7 @@ describe('GrupoService', () => {
   let repoGrupos: jest.Mocked<Repository<Grupo>>;
   let repoUsers: jest.Mocked<Repository<User>>;
   let repoMembresias: jest.Mocked<Repository<MembresiaGrupo>>;
+  let repoReunion: jest.Mocked<Repository<Reunion>>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -41,6 +43,10 @@ describe('GrupoService', () => {
           provide: getRepositoryToken(MembresiaGrupo),
           useFactory: mockRepo,
         },
+        {
+          provide: getRepositoryToken(Reunion),
+          useFactory: mockRepo,
+        },
       ],
     }).compile();
 
@@ -48,6 +54,7 @@ describe('GrupoService', () => {
     repoGrupos = module.get(getRepositoryToken(Grupo));
     repoUsers = module.get(getRepositoryToken(User));
     repoMembresias = module.get(getRepositoryToken(MembresiaGrupo));
+    repoReunion = module.get(getRepositoryToken(Reunion));
   });
 
   it('Debe crear un nuevo grupo', async () => {
