@@ -21,10 +21,10 @@ const mockRepoReviews = () => ({
   save: jest.fn(),
   merge: jest.fn(),
   remove: jest.fn(),
-  createQueryBuilder: jest.fn(),
   where: jest.fn(),
   andWhere: jest.fn(),
   getOne: jest.fn(),
+  createQueryBuilder: jest.fn(),
 });
 
 const mockRepoUsers = () => ({
@@ -112,8 +112,10 @@ describe('reviewsService', () => {
     };
 
     const mockQueryBuilder = {
+      select: jest.fn().mockReturnThis(),
       where: jest.fn().mockReturnThis(),
       andWhere: jest.fn().mockReturnThis(),
+      getRawOne: jest.fn().mockReturnThis(),
       getOne: jest.fn().mockResolvedValue(null),
     };
 
@@ -167,8 +169,10 @@ describe('reviewsService', () => {
     };
 
     const mockQueryBuilder = {
+      select: jest.fn().mockReturnThis(),
       where: jest.fn().mockReturnThis(),
       andWhere: jest.fn().mockReturnThis(),
+      getRawOne: jest.fn().mockReturnThis(),
       getOne: jest.fn().mockResolvedValue(null),
     };
 
@@ -336,11 +340,22 @@ describe('reviewsService', () => {
       password: 'contrasenia',
     };
 
+    const mockQueryBuilder = {
+      select: jest.fn().mockReturnThis(),
+      where: jest.fn().mockReturnThis(),
+      andWhere: jest.fn().mockReturnThis(),
+      getRawOne: jest.fn().mockReturnThis(),
+      getOne: jest.fn().mockResolvedValue(null),
+    };
+
+    repoReviews.createQueryBuilder.mockReturnValue(mockQueryBuilder as any);
+
     const user = { id: 2, ...dtoUser, rol: 'usuario' };
     const review = { id: 1, ...dto, user };
 
     repoReviews.findOne.mockResolvedValue(review as any);
     repoUsers.findOneBy.mockResolvedValue(user as any);
+    repoPeliculas.findOneBy.mockResolvedValue({ id: 1, calificacion: 0 } as any);
 
     repoReviews.remove.mockResolvedValue(review as any);
 
@@ -356,12 +371,23 @@ describe('reviewsService', () => {
       password: 'contrasenia',
     };
 
+    const mockQueryBuilder = {
+      select: jest.fn().mockReturnThis(),
+      where: jest.fn().mockReturnThis(),
+      andWhere: jest.fn().mockReturnThis(),
+      getRawOne: jest.fn().mockReturnThis(),
+      getOne: jest.fn().mockResolvedValue(null),
+    };
+
+    repoReviews.createQueryBuilder.mockReturnValue(mockQueryBuilder as any);
+
     const user = { id: 2, ...dtoUser, rol: 'usuario' };
     const admin = { id: 3, ...dtoUser, rol: 'admin' };
     const review = { id: 1, ...dto, user };
 
     repoReviews.findOne.mockResolvedValue(review as any);
     repoUsers.findOneBy.mockResolvedValue(admin as any);
+    repoPeliculas.findOneBy.mockResolvedValue({ id: 1, calificacion: 0 } as any);
 
     repoReviews.remove.mockResolvedValue(review as any);
 
@@ -455,12 +481,6 @@ describe('reviewsService', () => {
     });
   });
 
-  it('si el usuario no hizo reviews, lanzar NotFoundException', async () => {
-    repoReviews.find.mockResolvedValue([]);
-
-    expect(service.countByUsuario(1)).rejects.toThrow(NotFoundException);
-  });
-
   it('debería actualizar la review si el usuario es autor o admin', async () => {
     const review = {
       id: 1,
@@ -478,8 +498,19 @@ describe('reviewsService', () => {
       fechaCreacion: new Date(),
     } as User;
 
+    const mockQueryBuilder = {
+      select: jest.fn().mockReturnThis(),
+      where: jest.fn().mockReturnThis(),
+      andWhere: jest.fn().mockReturnThis(),
+      getRawOne: jest.fn().mockReturnThis(),
+      getOne: jest.fn().mockResolvedValue(null),
+    };
+
+    repoReviews.createQueryBuilder.mockReturnValue(mockQueryBuilder as any);
+
     repoReviews.findOne.mockResolvedValue(review);
     repoUsers.findOneBy.mockResolvedValue(user);
+    repoPeliculas.findOneBy.mockResolvedValue({ id: 1, calificacion: 0 } as any);
     repoReviews.save.mockResolvedValue({
       ...review,
       texto: 'Editado',

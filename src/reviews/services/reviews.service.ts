@@ -45,7 +45,7 @@ export class ReviewsService {
         if (!user || !pelicula) {
             throw new NotFoundException('Usuario o pelicula no encontrados.');
         }
-            
+
         if (grupoId) {
             const grupo = await this.grupoRepo.findOne({
                 where: { id: grupoId },
@@ -54,7 +54,7 @@ export class ReviewsService {
             if (!grupo) {
                 throw new NotFoundException('Grupo no encontrado.');
             }
-            
+
             const miembro = grupo.usuariosRelacionados.find(
                 (m) => m.user.id === userId,
             );
@@ -78,7 +78,7 @@ export class ReviewsService {
                 pelicula,
                 grupo,
             });
-        } 
+        }
         else {
             const existingReview = await this.reviewsRepo
                 .createQueryBuilder('review')
@@ -98,14 +98,7 @@ export class ReviewsService {
         }
 
         const savedReview = await this.reviewsRepo.save(review);
-        const { avg } = await this.reviewsRepo
-            .createQueryBuilder('review')
-            .select('AVG(review.puntuacion)', 'avg')
-            .where('review.peliculaId = :peliculaId', { peliculaId })
-            .getRawOne();
-
-        pelicula.calificacion = parseInt(avg);
-        await this.peliculasRepo.save(pelicula);
+        await this.updateMovieScore(pelicula.id);
 
         return savedReview;
     }
@@ -253,6 +246,8 @@ export class ReviewsService {
             throw new BadRequestException('Reseña no encontrada');
         }
 
+        const peliculaId = review.peliculaId;
+
         const user = await this.usersRepo.findOneBy({ id: userId });
         if (!user) {
             throw new BadRequestException('Usuario no encontrado.');
@@ -274,7 +269,10 @@ export class ReviewsService {
             review.puntuacion = updateData.puntuacion;
         }
 
-        return this.reviewsRepo.save(review);
+        const savedReview = await this.reviewsRepo.save(review);
+        await this.updateMovieScore(peliculaId);
+
+        return savedReview;
     }
 
     /**
@@ -293,6 +291,8 @@ export class ReviewsService {
             throw new BadRequestException('Reseña no encontrada');
         }
 
+        const peliculaId = review.peliculaId;
+
         const user = await this.usersRepo.findOneBy({ id: userId });
         if (!user) {
             throw new BadRequestException('Usuario no encontrado.');
@@ -307,6 +307,22 @@ export class ReviewsService {
             );
         }
 
+        await this.updateMovieScore(peliculaId);
         await this.reviewsRepo.remove(review);
+    }
+
+    private async updateMovieScore(peliculaId: number) {
+        const { avg } = await this.reviewsRepo
+            .createQueryBuilder('review')
+            .select('AVG(review.puntuacion)', 'avg')
+            .where('review.peliculaId = :peliculaId', { peliculaId })
+            .getRawOne();
+
+        const pelicula = await this.peliculasRepo.findOneBy({ id: peliculaId });
+        if (!pelicula) {
+            throw new NotFoundException("No se encontró la pelicula.");
+        }
+        pelicula.calificacion = avg ? parseInt(avg) : 0;
+        await this.peliculasRepo.save(pelicula);
     }
 }
