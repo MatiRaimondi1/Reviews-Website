@@ -4,6 +4,7 @@ import { ILike, Repository } from 'typeorm';
 import { Grupo } from '../entities/grupo.entity';
 import { User } from 'src/users/entities/user.entity';
 import { MembresiaGrupo } from '../entities/membresiaGrupo.entity';
+import { Reunion } from 'src/reuniones/entities/reunion.entity';
 
 /**
  * Servicio encargado de gestionar las operaciones relacionadas con los grupos
@@ -19,8 +20,8 @@ export class GrupoService {
   constructor(
     @InjectRepository(Grupo) private grupoRepo: Repository<Grupo>,
     @InjectRepository(User) private userRepo: Repository<User>,
-    @InjectRepository(MembresiaGrupo)
-    private membresiaGrupoRepo: Repository<MembresiaGrupo>,
+    @InjectRepository(MembresiaGrupo) private membresiaGrupoRepo: Repository<MembresiaGrupo>,
+    @InjectRepository(Reunion) private reunionRepo: Repository<Reunion>,
   ) {}
 
   /**
@@ -125,7 +126,9 @@ export class GrupoService {
         'Solo el líder o un administrador puede eliminar el grupo',
       );
     }
-
+  
+    await this.reunionRepo.delete({ grupo: { id: grupoId } });
+    await this.membresiaGrupoRepo.delete({ grupo: { id: grupoId }});
     await this.grupoRepo.remove(grupo);
 
     return { mensaje: 'Grupo eliminado correctamente' };
