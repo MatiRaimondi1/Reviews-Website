@@ -13,6 +13,7 @@ describe('PeliculasController', () => {
         create: jest.fn(),
         delete: jest.fn(),
         findByKey: jest.fn(),
+        findAllByKey: jest.fn(),
     };
 
     beforeEach(async () => {
@@ -98,14 +99,26 @@ describe('PeliculasController', () => {
         });
     });
 
-    describe('buscar', () => {
+    describe('search', () => {
         it('debería devolver las películas encontradas', async () => {
             const mockPeliculas = [{ id: 1, nombre: 'Matrix' }];
             mockPeliculasService.findByKey.mockResolvedValue(mockPeliculas);
 
-            const result = await controller.buscar('mat');
+            const result = await controller.search('mat');
 
             expect(service.findByKey).toHaveBeenCalledWith('mat');
+            expect(result).toEqual(mockPeliculas);
+        });
+    });
+
+    describe('searchAll', () => {
+        it('debería devolver las películas encontradas', async () => {
+            const mockPeliculas = [{ id: 1, nombre: 'Matrix' }];
+            mockPeliculasService.findAllByKey.mockResolvedValue(mockPeliculas);
+
+            const result = await controller.searchAll('mat', 0);
+
+            expect(service.findAllByKey).toHaveBeenCalledWith('mat', 0);
             expect(result).toEqual(mockPeliculas);
         });
     });

@@ -245,6 +245,53 @@ export class PeliculasController {
 
     @Get('search/name')
     @ApiOperation({
+        summary: 'Buscar hasta 10 películas por nombre',
+        description: 'Busca hasta 10 películas que coincidan con el término de búsqueda'
+    })
+    @ApiQuery({
+        name: 'q',
+        description: 'Término de búsqueda',
+        required: true,
+        example: 'padrino'
+    })
+    @ApiResponse({
+        status: 200,
+        description: 'Películas encontradas',
+        schema: {
+            example: [
+                {
+                    id: 1,
+                    nombre: 'El Padrino',
+                    genero: 'Drama',
+                    calificacion: 9.2
+                },
+                {
+                    id: 2,
+                    nombre: 'El Padrino: Parte II',
+                    genero: 'Drama',
+                    calificacion: 9.0
+                }
+            ]
+        }
+    })
+    @ApiResponse({
+        status: 400,
+        description: 'Debe proporcionar un término de búsqueda'
+    })
+    @ApiResponse({
+        status: 404,
+        description: 'No se encontraron películas'
+    })
+    search(@Query('q') query: string) {
+        if (!query || query.trim() === '') {
+            throw new BadRequestException('Debe proporcionar un término de búsqueda');
+        }
+        return this.peliculasService.findByKey(query);
+    }
+
+
+    @Get('search/name/all')
+    @ApiOperation({
         summary: 'Buscar películas por nombre',
         description: 'Busca películas que coincidan con el término de búsqueda'
     })
@@ -282,11 +329,11 @@ export class PeliculasController {
         status: 404,
         description: 'No se encontraron películas'
     })
-    buscar(@Query('q') query: string) {
+    searchAll(@Query('q') query: string, @Query('page', new PagePipe()) page = 0,)  {
         if (!query || query.trim() === '') {
             throw new BadRequestException('Debe proporcionar un término de búsqueda');
         }
-        return this.peliculasService.findByKey(query);
+        return this.peliculasService.findAllByKey(query, page);
     }
 
 

@@ -157,11 +157,36 @@ describe('PeliculasService', () => {
                 nombre: ILike('%bat%'),
             },
             order: { nombre: 'ASC' },
+            take: 10,
         });
         expect(result).toEqual(mockPeliculas);
     });
     it('si no se encontraron peliculas, deberia lanzar NotFoundException', () => {
         expect(service.findByKey('bat')).rejects.toThrow(NotFoundException)
+    })
+
+    it('debería devolver todas las películas que coincidan con la clave', async () => {
+        const mockPeliculas = [
+            { id: 1, nombre: 'Batman' },
+            { id: 2, nombre: 'Batalla naval' },
+        ] as Pelicula[];
+
+        repo.find.mockResolvedValue(mockPeliculas);
+
+        const result = await service.findAllByKey('bat', 0);
+
+        expect(repo.find).toHaveBeenCalledWith({
+            where: {
+                nombre: ILike(`%bat%`),
+            },
+            order: { nombre: 'ASC' },
+            skip: 0,
+            take: 10,
+        });
+        expect(result).toEqual(mockPeliculas);
+    });
+    it('si no se encontraron peliculas, deberia lanzar NotFoundException', () => {
+        expect(service.findAllByKey('bat', 2)).rejects.toThrow(NotFoundException)
     })
 
     it('debería lanzar BadRequest si el nombre del género está vacío', async () => {
@@ -202,5 +227,56 @@ describe('PeliculasService', () => {
         repo.find.mockResolvedValue([]);
 
         await expect(service.findByGenero('Acción')).rejects.toThrow(NotFoundException);
+    });
+
+    it('debería actualizar película sin cambiar género si no viene género en el body', async () => {
+        const peliculaExistente = { id: 1, nombre: 'Original', genero: { id: 1, nombre: 'Drama' } } as Pelicula;
+        repo.findOne.mockResolvedValue(peliculaExistente);
+        repo.save.mockResolvedValue({ ...peliculaExistente, nombre: 'Actualizada' });
+
+        const result = await service.update(1, { nombre: 'Actualizada' } as any);
+
+        expect(repo.merge).toHaveBeenCalledWith(peliculaExistente, {
+            nombre: 'Actualizada',
+            genero: undefined,
+        });
+        expect(repo.save).toHaveBeenCalledWith(peliculaExistente);
+        expect(result).toEqual({ ...peliculaExistente, nombre: 'Actualizada' });
+    });
+
+    it('debería crear un género nuevo si no existe y asignarlo a la película', async () => {
+        const peliculaExistente = { id: 1, nombre: 'Original' } as Pelicula;
+        repo.findOne.mockResolvedValue(peliculaExistente);
+        generoRepo.findOneBy.mockResolvedValue(null);
+        generoRepo.create.mockReturnValue({ nombre: 'Ciencia Ficción' } as Genero);
+        generoRepo.save.mockResolvedValue({ id: 2, nombre: 'Ciencia Ficción' } as Genero);
+        repo.save.mockResolvedValue({ ...peliculaExistente, nombre: 'Original', genero: { id: 2, nombre: 'Ciencia Ficción' } as Genero });
+
+        const result = await service.update(1, { nombre: 'Original', genero: 'Ciencia Ficción' } as any);
+
+        expect(generoRepo.create).toHaveBeenCalledWith({ nombre: 'Ciencia Ficción' });
+        expect(generoRepo.save).toHaveBeenCalled();
+        expect(repo.merge).toHaveBeenCalledWith(peliculaExistente, {
+            nombre: 'Original',
+            genero: { id: 2, nombre: 'Ciencia Ficción' },
+        });
+        expect(result.genero.nombre).toEqual('Ciencia Ficción');
+    });
+
+    it('debería asignar un género existente si existe en la base de datos', async () => {
+        const peliculaExistente = { id: 1, nombre: 'Original' } as Pelicula;
+        const generoExistente = { id: 3, nombre: 'Accion' } as Genero;
+        repo.findOne.mockResolvedValue(peliculaExistente);
+        generoRepo.findOneBy.mockResolvedValue(generoExistente);
+        repo.save.mockResolvedValue({ ...peliculaExistente, genero: generoExistente });
+
+        const result = await service.update(1, { nombre: 'Original', genero: 'Accion' } as any);
+
+        expect(generoRepo.findOneBy).toHaveBeenCalledWith({ nombre: 'Accion' });
+        expect(repo.merge).toHaveBeenCalledWith(peliculaExistente, {
+            nombre: 'Original',
+            genero: generoExistente,
+        });
+        expect(result.genero).toEqual(generoExistente);
     });
 });

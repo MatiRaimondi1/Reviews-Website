@@ -114,10 +114,10 @@ export class PeliculasService {
     }
 
     /**
-     * Busca todas las peliculas que coincidan con un cierto termino de busqueda
+     * Busca hasta 10 peliculas que coincidan con un cierto termino de busqueda
      * 
      * @param key Nombre parcial de la/s pelicula/s a buscar
-     * @returns Promesa con todas las peliculas que coincidan
+     * @returns Promesa con hasta 10 peliculas que coincidan
      */
     async findByKey(key: string) {
         const peliculas = await this.peliculasRepo.find({
@@ -125,6 +125,34 @@ export class PeliculasService {
                 nombre: ILike(`%${key}%`),
             },
             order: { nombre: 'ASC' },
+            take: 10,
+        });
+
+        if (!peliculas || peliculas.length === 0) {
+            throw new NotFoundException("No se encontraron peliculas.")
+        }
+
+        return peliculas;
+    }
+
+    /**
+     * Busca todas las peliculas que coincidan con un cierto termino de busqueda
+     * 
+     * @param key Nombre parcial de la/s pelicula/s a buscar
+     * @param page Número de página (comienza en 0). Por defecto, es 0.
+     * @returns Promesa con todas las peliculas que coincidan
+     */
+    async findAllByKey(key: string, page = 0) {
+        const limit = 10;
+        const offset = page * limit;
+
+        const peliculas = await this.peliculasRepo.find({
+            where: {
+                nombre: ILike(`%${key}%`),
+            },
+            order: { nombre: 'ASC' },
+            skip: offset,
+            take: limit,
         });
 
         if (!peliculas || peliculas.length === 0) {
@@ -173,7 +201,6 @@ export class PeliculasService {
      * @param body DTO con los campos a modificar.
      * @returns Promesa con la película actualizada.
      */
-
     async update(id: number, body: UpdatePeliculaDto) {
         const pelicula = await this.peliculasRepo.findOne({
             where: { id },
