@@ -4,7 +4,7 @@ import { PeliculasService } from './peliculas.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Pelicula } from '../entities/pelicula.entity';
 import { ILike, Repository } from 'typeorm';
-import { ConflictException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
 import { Genero } from 'src/generos/entities/genero.entity';
 
 const mockRepo = () => ({
@@ -50,7 +50,7 @@ describe('PeliculasService', () => {
         expect(repo.find).toHaveBeenCalledWith({ order: { nombre: 'ASC' }, skip: 0, take: 10 });
         expect(response).toEqual(result);
     });
-    it('si findAll no encuentra nada, debe arrojar un NotFoundException', () =>{
+    it('si findAll no encuentra nada, debe arrojar un NotFoundException', () => {
         expect(service.findAll()).rejects.toThrow(NotFoundException);
     })
 
@@ -62,7 +62,7 @@ describe('PeliculasService', () => {
         expect(repo.findOneBy).toHaveBeenCalledWith({ id: 1 });
         expect(result).toEqual(pelicula);
     });
-    it('si findOne no encuentra la pelicula debe arrojar NotFoundException', ()=>{
+    it('si findOne no encuentra la pelicula debe arrojar NotFoundException', () => {
         expect(service.findOne(1)).rejects.toThrow(NotFoundException);
     })
 
@@ -101,7 +101,7 @@ describe('PeliculasService', () => {
         expect(repo.save).toHaveBeenCalledWith(expectedPelicula);
         expect(result).toEqual(expectedPelicula);
     });
-    it('si la pelicula ya existe, debe arrojar ConflictException', ()=>{
+    it('si la pelicula ya existe, debe arrojar ConflictException', () => {
         const dto = {
             nombre: 'Nueva',
             sinopsis: 'Sinopsis',
@@ -137,8 +137,8 @@ describe('PeliculasService', () => {
         expect(repo.delete).toHaveBeenCalledWith(1);
         expect(result).toStrictEqual(expectedResult);
     });
-    it('si no se encuentra una pelicula para eliminar, debe lanzar NotFoundException', ()=>{
-        repo.delete.mockResolvedValue({affected: 0} as any)
+    it('si no se encuentra una pelicula para eliminar, debe lanzar NotFoundException', () => {
+        repo.delete.mockResolvedValue({ affected: 0 } as any)
         expect(service.delete(1)).rejects.toThrow(NotFoundException);
     })
 
@@ -160,7 +160,47 @@ describe('PeliculasService', () => {
         });
         expect(result).toEqual(mockPeliculas);
     });
-    it('si no se encontraron peliculas, deberia lanzar NotFoundException', ()=>{
+    it('si no se encontraron peliculas, deberia lanzar NotFoundException', () => {
         expect(service.findByKey('bat')).rejects.toThrow(NotFoundException)
     })
+
+    it('debería lanzar BadRequest si el nombre del género está vacío', async () => {
+        await expect(service.findByGenero('')).rejects.toThrow(BadRequestException);
+        await expect(service.findByGenero('   ')).rejects.toThrow(BadRequestException);
+        await expect(service.findByGenero(null as any)).rejects.toThrow(BadRequestException);
+    });
+
+    it('debería retornar películas si se encuentra por género con orden alfabético', async () => {
+        const mockPeliculas = [{ id: 1, nombre: 'Test', calificacion: 7 }] as any;
+        repo.find.mockResolvedValue(mockPeliculas);
+
+        const result = await service.findByGenero('Drama', 0, 'asc');
+        expect(result).toEqual(mockPeliculas);
+        expect(repo.find).toHaveBeenCalledWith({
+            where: { genero: { nombre: 'Drama' } },
+            order: { nombre: 'ASC' },
+            skip: 0,
+            take: 10,
+        });
+    });
+
+    it('debería retornar películas ordenadas por calificación descendente', async () => {
+        const mockPeliculas = [{ id: 1, nombre: 'Test', calificacion: 9 }] as any;
+        repo.find.mockResolvedValue(mockPeliculas);
+
+        const result = await service.findByGenero('Comedia', 1, undefined, 'desc');
+        expect(result).toEqual(mockPeliculas);
+        expect(repo.find).toHaveBeenCalledWith({
+            where: { genero: { nombre: 'Comedia' } },
+            order: { calificacion: 'DESC' },
+            skip: 10,
+            take: 10,
+        });
+    });
+
+    it('debería lanzar NotFoundException si no hay resultados', async () => {
+        repo.find.mockResolvedValue([]);
+
+        await expect(service.findByGenero('Acción')).rejects.toThrow(NotFoundException);
+    });
 });
