@@ -3,13 +3,13 @@ import { ReviewsService } from "../services/reviews.service";
 import { CreateReviewDto } from "../dto/create-review.dto";
 import { JwtAuthGuard } from "src/auth/guards/jwt-auth.guard";
 import { Role } from "src/auth/decorators/role.decorator";
-import { ApiBearerAuth, ApiOperation, ApiParam, ApiQuery, ApiResponse } from "@nestjs/swagger";
+import { ApiBadRequestResponse, ApiBearerAuth, ApiBody, ApiConflictResponse, ApiNotFoundResponse, ApiOperation, ApiParam, ApiQuery, ApiResponse } from "@nestjs/swagger";
 
 @Controller('api/reviews')
 export class ReviewsController {
     constructor(
         private readonly reviewsService: ReviewsService
-    ) {}
+    ) { }
 
     @UseGuards(JwtAuthGuard)
     @Role('user', 'admin')
@@ -44,25 +44,25 @@ export class ReviewsController {
             }
         }
     })
-    @ApiResponse({
-        status: 400,
-        description: 'Datos de entrada inválidos'
+    @ApiNotFoundResponse({
+        description: 'Usuario, película o grupo no encontrado',
+        schema: {
+            example: {
+                statusCode: 404,
+                message: 'Usuario, película o grupo no encontrado',
+                error: 'Not Found'
+            }
+        }
     })
-    @ApiResponse({
-        status: 401,
-        description: 'No autorizado (token inválido o no proporcionado)'
-    })
-    @ApiResponse({
-        status: 403,
-        description: 'No tiene permisos para realizar esta acción'
-    })
-    @ApiResponse({
-        status: 404,
-        description: 'Usuario, película o grupo no encontrado'
-    })
-    @ApiResponse({
-        status: 409,
-        description: 'Ya existe una review para esta película por este usuario/grupo'
+    @ApiConflictResponse({
+        description: 'Ya existe una review para esta película por este usuario/grupo',
+        schema: {
+            example: {
+                statusCode: 409,
+                message: 'Ya existe una review para esta película por este usuario/grupo',
+                error: 'Conflict'
+            }
+        }
     })
     create(
         @Param('peliculaId', ParseIntPipe) peliculaId: number,
@@ -88,12 +88,12 @@ export class ReviewsController {
         example: 1
     })
     @ApiQuery({
-            name: 'page',
-            required: false,
-            type: Number,
-            description: 'Número de página (comienza en 0)',
-            example: 0
-        })
+        name: 'page',
+        required: false,
+        type: Number,
+        description: 'Número de página (comienza en 0)',
+        example: 0
+    })
     @ApiResponse({
         status: 200,
         description: 'Lista de reviews obtenida exitosamente',
@@ -120,9 +120,15 @@ export class ReviewsController {
             ]
         }
     })
-    @ApiResponse({
-        status: 404,
-        description: 'No se encontraron reviews para esta película'
+    @ApiNotFoundResponse({
+        description: 'No se encontraron reviews para esta película',
+        schema: {
+            example: {
+                statusCode: 404,
+                message: 'No se encontraron reviews para esta película',
+                error: 'Not Found'
+            }
+        }
     })
     findByPelicula(
         @Param('peliculaId', ParseIntPipe) peliculaId: number,
@@ -176,9 +182,15 @@ export class ReviewsController {
             ]
         }
     })
-    @ApiResponse({
-        status: 404,
-        description: 'El usuario no tiene reviews o no existe'
+    @ApiNotFoundResponse({
+        description: 'El usuario no tiene reviews o no existe',
+        schema: {
+            example: {
+                statusCode: 404,
+                message: 'El usuario no tiene reviews o no existe',
+                error: 'Not Found'
+            }
+        }
     })
     getReviewsByUsuario(
         @Param('userId', ParseIntPipe) userId: number,
@@ -187,7 +199,7 @@ export class ReviewsController {
         return this.reviewsService.findByUsuario(userId, page);
     }
 
-    
+
     @Get('grupo/:grupoId')
     @ApiOperation({
         summary: 'Obtener reviews de un grupo',
@@ -223,9 +235,15 @@ export class ReviewsController {
             ]
         }
     })
-    @ApiResponse({
-        status: 404,
-        description: 'El grupo no tiene reviews o no existe'
+    @ApiNotFoundResponse({
+        description: 'El grupo no tiene reviews o no existe',
+        schema: {
+            example: {
+                statusCode: 404,
+                message: 'El grupo no tiene reviews o no existe',
+                error: 'Not Found'
+            }
+        }
     })
     getReviewsByGrupo(
         @Param('grupoId', ParseIntPipe) grupoId: number,
@@ -298,6 +316,22 @@ export class ReviewsController {
         type: Number,
         example: 1
     })
+    @ApiBody({
+        description: 'Campos a actualizar',
+        schema: {
+            type: 'object',
+            properties: {
+                texto: {
+                    type: 'string',
+                    example: 'Nuevo texto de la review'
+                },
+                calificacion: {
+                    type: 'number',
+                    example: '8'
+                }
+            }
+        }
+    })
     @ApiResponse({
         status: 200,
         description: 'Review actualizada exitosamente',
@@ -309,21 +343,25 @@ export class ReviewsController {
             }
         }
     })
-    @ApiResponse({
-        status: 400,
-        description: 'Datos inválidos o no eres el autor'
+    @ApiBadRequestResponse({
+        description: 'No puedes editar una reseña que no has creado',
+        schema: {
+            example: {
+                statusCode: 400,
+                message: 'No puedes editar una reseña que no has creado',
+                error: 'Bad Request'
+            }
+        }
     })
-    @ApiResponse({
-        status: 401,
-        description: 'No autorizado (token inválido o no proporcionado)'
-    })
-    @ApiResponse({
-        status: 403,
-        description: 'No tiene permisos para realizar esta acción'
-    })
-    @ApiResponse({
-        status: 404,
-        description: 'Review no encontrada'
+    @ApiNotFoundResponse({
+        description: 'Reseña o usuario no encontrados',
+        schema: {
+            example: {
+                statusCode: 404,
+                message: 'Reseña o usuario no encontrados',
+                error: 'Not Found'
+            }
+        }
     })
     async edit(
         @Param('id', ParseIntPipe) id: number,
@@ -359,21 +397,25 @@ export class ReviewsController {
             }
         }
     })
-    @ApiResponse({
-        status: 400,
-        description: 'No eres el autor de esta review'
+    @ApiBadRequestResponse({
+        description: 'No puedes eliminar una reseña que no has creado',
+        schema: {
+            example: {
+                statusCode: 400,
+                message: 'No puedes eliminar una reseña que no has creado',
+                error: 'Bad Request'
+            }
+        }
     })
-    @ApiResponse({
-        status: 401,
-        description: 'No autorizado (token inválido o no proporcionado)'
-    })
-    @ApiResponse({
-        status: 403,
-        description: 'No tiene permisos para realizar esta acción'
-    })
-    @ApiResponse({
-        status: 404,
-        description: 'Review no encontrada'
+    @ApiNotFoundResponse({
+        description: 'Reseña o usuario no encontrados',
+        schema: {
+            example: {
+                statusCode: 404,
+                message: 'Reseña o usuario no encontrados',
+                error: 'Not Found'
+            }
+        }
     })
     delete(@Param('id', ParseIntPipe) id: number, @Request() req) {
         const user = req.user.id;

@@ -22,7 +22,7 @@ export class ReunionController {
         description: 'Datos requeridos para crear la reunión',
         examples: {
             example1: {
-                summary: 'Creación básica',
+                summary: 'Crear reunión',
                 value: {
                     fecha: '2023-12-15T20:00:00Z',
                     link: 'https://meet.google.com/abc-def-ghi'

@@ -21,7 +21,7 @@ export class AuthController {
         description: 'Datos requeridos para el registro',
         examples: {
             ejemplo1: {
-                summary: 'Registro básico',
+                summary: 'Registrar cuenta',
                 value: {
                     username: 'usuario1',
                     email: 'usuario@example.com',
@@ -68,8 +68,8 @@ export class AuthController {
         type: LoginDto,
         description: 'Credenciales de acceso',
         examples: {
-            ejemplo1: {
-                summary: 'Login básico',
+            ejemplo: {
+                summary: 'Iniciar sesión',
                 value: {
                     email: 'usuario@example.com',
                     password: 'Password123!'

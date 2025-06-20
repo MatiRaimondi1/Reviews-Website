@@ -11,11 +11,11 @@ import { Genero } from 'src/generos/entities/genero.entity';
  * pueden importarse en otros modulos
  */
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Pelicula, Genero])
-  ],
-  providers: [PeliculasService],
-  controllers: [PeliculasController],
-  exports: [PeliculasService, TypeOrmModule]
+    imports: [
+        TypeOrmModule.forFeature([Pelicula, Genero])
+    ],
+    providers: [PeliculasService],
+    controllers: [PeliculasController],
+    exports: [PeliculasService, TypeOrmModule]
 })
-export class PeliculasModule {}
+export class PeliculasModule { }

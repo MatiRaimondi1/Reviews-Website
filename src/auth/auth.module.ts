@@ -8,31 +8,31 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
-  imports: [
-    UsersModule,
-    ConfigModule,
-    JwtModule.registerAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      global: true,
-      useFactory: async (configService: ConfigService) => ({
-        secret: configService.get<string>('AUTH_SECRET'),
-        signOptions: { expiresIn: '1d' },
-      }),
-    }),
-    ThrottlerModule.forRoot({
-      throttlers: [
-        {
-          ttl: 60000,
-          limit: 5
-        },
-      ],
-    }),
-  ],
-  controllers: [AuthController],
-  providers: [
-    AuthService,
-    JwtStrategy,
-  ],
+    imports: [
+        UsersModule,
+        ConfigModule,
+        JwtModule.registerAsync({
+            imports: [ConfigModule],
+            inject: [ConfigService],
+            global: true,
+            useFactory: async (configService: ConfigService) => ({
+                secret: configService.get<string>('AUTH_SECRET'),
+                signOptions: { expiresIn: '1d' },
+            }),
+        }),
+        ThrottlerModule.forRoot({
+            throttlers: [
+                {
+                    ttl: 60000,
+                    limit: 5
+                },
+            ],
+        }),
+    ],
+    controllers: [AuthController],
+    providers: [
+        AuthService,
+        JwtStrategy,
+    ],
 })
-export class AuthModule {}
+export class AuthModule { }

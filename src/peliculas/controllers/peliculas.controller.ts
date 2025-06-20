@@ -9,13 +9,13 @@ import { extname } from 'path';
 import { diskStorage } from 'multer';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { PagePipe } from '../pipes/page.pipe';
-import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { ApiBadRequestResponse, ApiBearerAuth, ApiBody, ApiConflictResponse, ApiConsumes, ApiNotFoundResponse, ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
 
 @Controller('api/peliculas')
 export class PeliculasController {
     constructor(
         private peliculasService: PeliculasService
-    ) {}
+    ) { }
 
     @Get()
     @ApiOperation({
@@ -59,9 +59,15 @@ export class PeliculasController {
             ]
         }
     })
-    @ApiResponse({
-        status: 404,
-        description: 'No se encontraron películas'
+    @ApiNotFoundResponse({
+        description: 'No se encontraron peliculas',
+        schema: {
+            example: {
+                statusCode: 404,
+                message: 'No se encontraron peliculas',
+                error: 'Not Found'
+            }
+        }
     })
     findAll(
         @Query('page', new PagePipe()) page = 0,
@@ -115,13 +121,25 @@ export class PeliculasController {
             ]
         }
     })
-    @ApiResponse({
-        status: 400,
-        description: 'El género no puede estar vacío'
+    @ApiBadRequestResponse({
+        description: 'El género no puede estar vacío',
+        schema: {
+            example: {
+                statusCode: 400,
+                message: 'El género no puede estar vacío',
+                error: 'Bad Request'
+            }
+        }
     })
-    @ApiResponse({
-        status: 404,
-        description: 'No se encontraron películas con el género especificado'
+    @ApiNotFoundResponse({
+        description: 'No se encontraron películas con el género especificado',
+        schema: {
+            example: {
+                statusCode: 404,
+                message: 'No se encontraron películas con el género especificado',
+                error: 'Not Found'
+            }
+        }
     })
     findByGenero(@Param('genero') genero: string,
         @Query('page', new PagePipe()) page = 0,
@@ -159,9 +177,15 @@ export class PeliculasController {
             }
         }
     })
-    @ApiResponse({
-        status: 404,
-        description: 'No se encontró la película con el ID especificado'
+    @ApiNotFoundResponse({
+        description: 'No se encontró la película con el ID especificado',
+        schema: {
+            example: {
+                statusCode: 404,
+                message: 'No se encontró la película con el ID especificado',
+                error: 'Not Found'
+            }
+        }
     })
     findOne(@Param('id', ParseIntPipe) id: number) {
         return this.peliculasService.findOne(id);
@@ -212,21 +236,15 @@ export class PeliculasController {
             }
         }
     })
-    @ApiResponse({
-        status: 400,
-        description: 'Datos de entrada inválidos'
-    })
-    @ApiResponse({
-        status: 401,
-        description: 'No autorizado (token inválido o no proporcionado)'
-    })
-    @ApiResponse({
-        status: 403,
-        description: 'No tiene permisos para realizar esta acción'
-    })
-    @ApiResponse({
-        status: 409,
-        description: 'Ya existe una película con ese nombre'
+    @ApiConflictResponse({
+        description: 'Ya existe una película con ese nombre',
+        schema: {
+            example: {
+                statusCode: 409,
+                message: 'Ya existe una película con ese nombre',
+                error: 'Conflict'
+            }
+        }
     })
     @UseInterceptors(FileInterceptor('imagen', {
         storage: diskStorage({
@@ -274,13 +292,25 @@ export class PeliculasController {
             ]
         }
     })
-    @ApiResponse({
-        status: 400,
-        description: 'Debe proporcionar un término de búsqueda'
+    @ApiBadRequestResponse({
+        description: 'Debe proporcionar un término de búsqueda',
+        schema: {
+            example: {
+                statusCode: 400,
+                message: 'Debe proporcionar un término de búsqueda',
+                error: 'Bad Request'
+            }
+        }
     })
-    @ApiResponse({
-        status: 404,
-        description: 'No se encontraron películas'
+    @ApiNotFoundResponse({
+        description: 'No se encontraron películas',
+        schema: {
+            example: {
+                statusCode: 404,
+                message: 'No se encontraron películas',
+                error: 'Not Found'
+            }
+        }
     })
     search(@Query('q') query: string) {
         if (!query || query.trim() === '') {
@@ -306,7 +336,7 @@ export class PeliculasController {
         description: 'Número de página (comienza en 0)',
         example: 0
     })
-        @ApiQuery({
+    @ApiQuery({
         name: 'alphabetic',
         required: false,
         enum: ['asc', 'desc'],
@@ -318,13 +348,25 @@ export class PeliculasController {
         enum: ['asc', 'desc'],
         description: 'Orden por calificación (ascendente o descendente)'
     })
-    @ApiResponse({
-        status: 400,
-        description: 'Debe proporcionar un término de búsqueda'
+    @ApiBadRequestResponse({
+        description: 'Debe proporcionar un término de búsqueda',
+        schema: {
+            example: {
+                statusCode: 400,
+                message: 'Debe proporcionar un término de búsqueda',
+                error: 'Bad Request'
+            }
+        }
     })
-    @ApiResponse({
-        status: 404,
-        description: 'No se encontraron películas'
+    @ApiNotFoundResponse({
+        description: 'No se encontraron películas',
+        schema: {
+            example: {
+                statusCode: 404,
+                message: 'No se encontraron películas',
+                error: 'Not Found'
+            }
+        }
     })
     searchByGeneroByKey(@Param('genero') genero: string,
         @Query('q') query: string,
@@ -370,18 +412,30 @@ export class PeliculasController {
             ]
         }
     })
-    @ApiResponse({
-        status: 400,
-        description: 'Debe proporcionar un término de búsqueda'
+    @ApiBadRequestResponse({
+        description: 'Debe proporcionar un término de búsqueda',
+        schema: {
+            example: {
+                statusCode: 400,
+                message: 'Debe proporcionar un término de búsqueda',
+                error: 'Bad Request'
+            }
+        }
     })
-    @ApiResponse({
-        status: 404,
-        description: 'No se encontraron películas'
+    @ApiNotFoundResponse({
+        description: 'No se encontraron películas',
+        schema: {
+            example: {
+                statusCode: 404,
+                message: 'No se encontraron películas',
+                error: 'Not Found'
+            }
+        }
     })
     searchAll(@Query('q') query: string,
         @Query('page', new PagePipe()) page = 0,
         @Query('alphabetic') alphabetic?: 'asc' | 'desc',
-        @Query('rating') rating?: 'asc' | 'desc',)  {
+        @Query('rating') rating?: 'asc' | 'desc',) {
         if (!query || query.trim() === '') {
             throw new BadRequestException('Debe proporcionar un término de búsqueda');
         }
@@ -403,7 +457,38 @@ export class PeliculasController {
         type: Number,
         example: 1
     })
-    @ApiBody({ type: UpdatePeliculaDto })
+    @ApiBody({
+        description: 'Campos a actualizar',
+        schema: {
+            type: 'object',
+            properties: {
+                nombre: {
+                    type: 'string',
+                    example: 'Nuevo nombre de la pelicula'
+                },
+                descripcion: {
+                    type: 'string',
+                    example: 'Nueva sinopsis de la pelicula'
+                },
+                genero: {
+                    type: 'string',
+                    example: 'Nuevo genero de la pelicula'
+                },
+                fechaEstreno: {
+                    type: 'Date',
+                    example: '1972-03-24T00:00:00.000Z'
+                },
+                duracion: {
+                    type: 'number',
+                    example: '180'
+                },
+                calificacion: {
+                    type: 'number',
+                    example: '9'
+                }
+            }
+        }
+    })
     @ApiResponse({
         status: 200,
         description: 'Película actualizada exitosamente',
@@ -420,27 +505,21 @@ export class PeliculasController {
             }
         }
     })
-    @ApiResponse({
-        status: 400,
-        description: 'Datos de entrada inválidos'
-    })
-    @ApiResponse({
-        status: 401,
-        description: 'No autorizado (token inválido o no proporcionado)'
-    })
-    @ApiResponse({
-        status: 403,
-        description: 'No tiene permisos para realizar esta acción'
-    })
-    @ApiResponse({
-        status: 404,
-        description: 'No se encontró la película con el ID especificado'
+    @ApiNotFoundResponse({
+        description: 'No se encontró la película con el ID especificado',
+        schema: {
+            example: {
+                statusCode: 404,
+                message: 'No se encontró la película con el ID especificado',
+                error: 'Not Found'
+            }
+        }
     })
     update(@Param('id') id: number, @Body() body: UpdatePeliculaDto) {
         return this.peliculasService.update(id, body);
     }
 
-    
+
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Role('admin')
     @Delete(':id')
@@ -465,17 +544,15 @@ export class PeliculasController {
             }
         }
     })
-    @ApiResponse({
-        status: 401,
-        description: 'No autorizado (token inválido o no proporcionado)'
-    })
-    @ApiResponse({
-        status: 403,
-        description: 'No tiene permisos para realizar esta acción'
-    })
-    @ApiResponse({
-        status: 404,
-        description: 'No se encontró la película con el ID especificado'
+    @ApiNotFoundResponse({
+        description: 'No se encontró la película con el ID especificado',
+        schema: {
+            example: {
+                statusCode: 404,
+                message: 'No se encontró la película con el ID especificado',
+                error: 'Not Found'
+            }
+        }
     })
     delete(@Param('id') id: number) {
         return this.peliculasService.delete(id);

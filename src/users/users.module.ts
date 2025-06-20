@@ -10,11 +10,11 @@ import { MembresiaGrupo } from 'src/grupos/entities/membresiaGrupo.entity';
  * pueden importarse en otros modulos
  */
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([User]),
-  ],
-  controllers: [UsersController],
-  providers: [UsersService],
-  exports: [UsersService, TypeOrmModule],
+    imports: [
+        TypeOrmModule.forFeature([User]),
+    ],
+    controllers: [UsersController],
+    providers: [UsersService],
+    exports: [UsersService, TypeOrmModule],
 })
-export class UsersModule {}
+export class UsersModule { }

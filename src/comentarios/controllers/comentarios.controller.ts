@@ -31,7 +31,7 @@ export class ComentariosController {
         description: 'Contenido del comentario',
         examples: {
             ejemplo1: {
-                summary: 'Comentario normal',
+                summary: 'Crear comentario',
                 value: {
                     texto: 'Estoy totalmente de acuerdo con tu review!'
                 }
@@ -62,16 +62,6 @@ export class ComentariosController {
                 statusCode: 404,
                 message: 'Review o usuario no encontrado',
                 error: 'Not Found'
-            }
-        }
-    })
-    @ApiForbiddenResponse({
-        description: 'No autorizado',
-        schema: {
-            example: {
-                statusCode: 403,
-                message: 'Forbidden resource',
-                error: 'Forbidden'
             }
         }
     })
@@ -124,23 +114,12 @@ export class ComentariosController {
         }
     })
     @ApiNotFoundResponse({
-        description: 'Review no encontrada o sin comentarios',
+        description: 'No se encontró la review o comentarios',
         schema: {
-            examples: {
-                reviewNotFound: {
-                    value: {
-                        statusCode: 404,
-                        message: 'No se encontro una review con este id',
-                        error: 'Not Found'
-                    }
-                },
-                noComments: {
-                    value: {
-                        statusCode: 404,
-                        message: 'No se encontraron comentarios para esta review',
-                        error: 'Not Found'
-                    }
-                }
+            example: {
+                statusCode: 404,
+                message: 'No se encontro una review con este id. // No se encontraron comentarios para esta review.',
+                error: 'Not Found'
             }
         }
     })
@@ -174,23 +153,12 @@ export class ComentariosController {
         }
     })
     @ApiNotFoundResponse({
-        description: 'Comentario o usuario no encontrado',
+        description: 'No se encontró la review o comentarios',
         schema: {
-            examples: {
-                commentNotFound: {
-                    value: {
-                        statusCode: 404,
-                        message: 'Comentario no encontrado',
-                        error: 'Not Found'
-                    }
-                },
-                userNotFound: {
-                    value: {
-                        statusCode: 404,
-                        message: 'Usuario no encontrado',
-                        error: 'Not Found'
-                    }
-                }
+            example: {
+                statusCode: 404,
+                message: 'Usuario no encontrado. // Comentario no encontrado.',
+                error: 'Not Found'
             }
         }
     })

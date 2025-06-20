@@ -9,7 +9,6 @@ async function bootstrap() {
     const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
     // API Config
-    /*
     app.enableCors({
         origin: [process.env.ORIGIN!],
         methods: ['GET', 'PUT', 'POST', 'DELETE', 'PATCH'],
@@ -17,7 +16,6 @@ async function bootstrap() {
         credentials: true,
         maxAge: 86400
     });
-    */
 
     app.useGlobalPipes(
         new ValidationPipe({

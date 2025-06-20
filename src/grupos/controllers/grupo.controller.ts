@@ -33,21 +33,10 @@ export class GrupoController {
     @ApiConflictResponse({
         description: 'El usuario ya pertenece a un grupo o el nombre del grupo ya existe',
         schema: {
-            examples: {
-                userInGroup: {
-                    value: {
-                        statusCode: 409,
-                        message: 'No puedes estar en más de un grupo',
-                        error: 'Conflict'
-                    }
-                },
-                groupExists: {
-                    value: {
-                        statusCode: 409,
-                        message: 'Ya existe un grupo con ese nombre',
-                        error: 'Conflict'
-                    }
-                }
+            example: {
+                statusCode: 409,
+                message: 'No puedes estar en más de un grupo // Ya existe un grupo con ese nombre',
+                error: 'Conflict'
             }
         }
     })
@@ -157,21 +146,10 @@ export class GrupoController {
     @ApiNotFoundResponse({
         description: 'Grupo no encontrado o usuario no pertenece al grupo',
         schema: {
-            examples: {
-                groupNotFound: {
-                    value: {
-                        statusCode: 404,
-                        message: 'Grupo no encontrado',
-                        error: 'Not Found'
-                    }
-                },
-                userNotInGroup: {
-                    value: {
-                        statusCode: 404,
-                        message: 'El usuario a expulsar no pertenece al grupo',
-                        error: 'Not Found'
-                    }
-                }
+            example: {
+                statusCode: 404,
+                message: 'Grupo no encontrado // El usuario a expulsar no pertenece al grupo',
+                error: 'Not Found'
             }
         }
     })
@@ -256,17 +234,8 @@ export class GrupoController {
         status: 200,
         description: 'Usuario abandonó el grupo exitosamente',
         schema: {
-            examples: {
-                normalLeave: {
-                    value: {
-                        mensaje: 'Saliste del grupo correctamente'
-                    }
-                },
-                groupDeleted: {
-                    value: {
-                        mensaje: 'Saliste del grupo. El grupo fue eliminado porque no tenía más miembros'
-                    }
-                }
+            example: {
+                mensaje: 'Saliste del grupo correctamente // Saliste del grupo. El grupo fue eliminado porque no tenía más miembros'
             }
         }
     })
@@ -571,21 +540,10 @@ export class GrupoController {
         status: 200,
         description: 'Información de membresía obtenida exitosamente',
         schema: {
-            examples: {
-                isMember: {
-                    value: {
-                        mensaje: 'El usuario pertenece al grupo',
-                        enGrupo: true,
-                        rol: 'miembro'
-                    }
-                },
-                notMember: {
-                    value: {
-                        mensaje: 'El usuario no pertenece al grupo',
-                        enGrupo: false,
-                        rol: ''
-                    }
-                }
+            example: {
+                mensaje: 'El usuario pertenece al grupo // El usuario no pertenece al grupo',
+                enGrupo: 'true // false',
+                rol: 'miembro // lider'
             }
         }
     })
