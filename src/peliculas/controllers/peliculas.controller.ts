@@ -289,6 +289,55 @@ export class PeliculasController {
         return this.peliculasService.findByKey(query);
     }
 
+    @Get('search/name/genero')
+    @ApiOperation({
+        summary: 'Buscar películas por nombre dentro de un genero',
+        description: 'Busca películas que coincidan con el término de búsqueda dentro de un genero'
+    })
+    @ApiQuery({
+        name: 'q',
+        description: 'Término de búsqueda',
+        required: true,
+    })
+    @ApiQuery({
+        name: 'page',
+        required: true,
+        type: Number,
+        description: 'Número de página (comienza en 0)',
+        example: 0
+    })
+        @ApiQuery({
+        name: 'alphabetic',
+        required: false,
+        enum: ['asc', 'desc'],
+        description: 'Orden alfabético (ascendente o descendente)'
+    })
+    @ApiQuery({
+        name: 'rating',
+        required: false,
+        enum: ['asc', 'desc'],
+        description: 'Orden por calificación (ascendente o descendente)'
+    })
+    @ApiResponse({
+        status: 400,
+        description: 'Debe proporcionar un término de búsqueda'
+    })
+    @ApiResponse({
+        status: 404,
+        description: 'No se encontraron películas'
+    })
+    searchByGeneroByKey(@Param('genero') genero: string,
+        @Query('q') query: string,
+        @Query('page', new PagePipe()) page = 0,
+        @Query('alphabetic') alphabetic?: 'asc' | 'desc',
+        @Query('rating') rating?: 'asc' | 'desc',
+    ) {
+        if (!query || query.trim() === '') {
+            throw new BadRequestException('Debe proporcionar un término de búsqueda');
+        }
+        return this.peliculasService.findByGeneroByKey(genero, query, page, alphabetic, rating);
+    }
+
 
     @Get('search/name/all')
     @ApiOperation({
@@ -329,11 +378,14 @@ export class PeliculasController {
         status: 404,
         description: 'No se encontraron películas'
     })
-    searchAll(@Query('q') query: string, @Query('page', new PagePipe()) page = 0,)  {
+    searchAll(@Query('q') query: string,
+        @Query('page', new PagePipe()) page = 0,
+        @Query('alphabetic') alphabetic?: 'asc' | 'desc',
+        @Query('rating') rating?: 'asc' | 'desc',)  {
         if (!query || query.trim() === '') {
             throw new BadRequestException('Debe proporcionar un término de búsqueda');
         }
-        return this.peliculasService.findAllByKey(query, page);
+        return this.peliculasService.findAllByKey(query, page, alphabetic, rating);
     }
 
 

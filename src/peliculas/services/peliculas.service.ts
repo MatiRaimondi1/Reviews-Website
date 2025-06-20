@@ -25,21 +25,15 @@ export class PeliculasService {
      * Obtiene una lista paginada de películas.
      * 
      * @param page Número de página (comienza en 0). Por defecto, es 0.
+     * @param alphabetic Ordenar lista alfabeticamente de forma ascendente o descendente
+     * @param rating Ordenar lista por rating de forma ascendente o descendente
      * @returns Promesa con una lista de hasta 10 películas.
      */
     async findAll(page = 0, alphabetic?: 'asc' | 'desc', rating?: 'asc' | 'desc') {
         const limit = 10;
         const offset = page * limit;
 
-        const order: any = {};
-
-        if (alphabetic) {
-            order.nombre = alphabetic.toUpperCase();
-        } else if (rating) {
-            order.calificacion = rating.toUpperCase();
-        } else {
-            order.nombre = 'ASC';
-        }
+        const order = this.asignOrder(alphabetic, rating)
 
         const peliculas = await this.peliculasRepo.find({
             order,
@@ -59,25 +53,17 @@ export class PeliculasService {
      * 
      * @param nombreGenero Nombre del genero de la pelicula.
      * @param page Número de página (comienza en 0). Por defecto, es 0.
+     * @param alphabetic Ordenar lista alfabeticamente de forma ascendente o descendente
+     * @param rating Ordenar lista por rating de forma ascendente o descendente
      * @returns Promesa con una lista de hasta 10 peliculas por genero.
      */
     async findByGenero(nombreGenero: string, page = 0, alphabetic?: 'asc' | 'desc', rating?: 'asc' | 'desc') {
-        if (!nombreGenero || nombreGenero.trim() === '') {
-            throw new BadRequestException('El género no puede estar vacío.');
-        }
+        this.validateGenero(nombreGenero);
 
         const limit = 10;
         const offset = page * limit;
-        
-        const order: any = {};
 
-        if (alphabetic) {
-            order.nombre = alphabetic.toUpperCase();
-        } else if (rating) {
-            order.calificacion = rating.toUpperCase();
-        } else {
-            order.nombre = 'ASC';
-        }
+        const order = this.asignOrder(alphabetic, rating);
 
         const peliculas = await this.peliculasRepo.find({
             where: {
@@ -92,6 +78,43 @@ export class PeliculasService {
 
         if (!peliculas || peliculas.length === 0) {
             throw new NotFoundException(`No se encontraron películas con el género '${nombreGenero}'.`);
+        }
+
+        return peliculas;
+    }
+
+    /**
+    * Busca todas las peliculas que coincidan con un cierto termino de busqueda y genero
+    * 
+    * @param nombreGenero Nombre del genero de las peliculas
+    * @param key Nombre parcial de la/s pelicula/s a buscar
+    * @param page Número de página (comienza en 0). Por defecto, es 0.
+    * @param alphabetic Ordenar lista alfabeticamente de forma ascendente o descendente
+    * @param rating Ordenar lista por rating de forma ascendente o descendente
+    * @returns Promesa con todas las peliculas que coincidan
+    */
+    async findByGeneroByKey(nombreGenero: string, key: string, page = 0, alphabetic?: 'asc' | 'desc', rating?: 'asc' | 'desc') {
+        this.validateGenero(nombreGenero);
+
+        const limit = 10;
+        const offset = page * limit;
+
+        const order = this.asignOrder(alphabetic, rating);
+
+        const peliculas = await this.peliculasRepo.find({
+            where: {
+                genero: {
+                    nombre: nombreGenero
+                },
+                nombre: ILike(`%${key}%`),
+            },
+            order,
+            skip: offset,
+            take: limit,
+        });
+
+        if (!peliculas || peliculas.length === 0) {
+            throw new NotFoundException(`No se encontraron películas con el nombre '${key}'.`);
         }
 
         return peliculas;
@@ -140,17 +163,21 @@ export class PeliculasService {
      * 
      * @param key Nombre parcial de la/s pelicula/s a buscar
      * @param page Número de página (comienza en 0). Por defecto, es 0.
+     * @param alphabetic Ordenar lista alfabeticamente de forma ascendente o descendente
+     * @param rating Ordenar lista por rating de forma ascendente o descendente
      * @returns Promesa con todas las peliculas que coincidan
      */
-    async findAllByKey(key: string, page = 0) {
+    async findAllByKey(key: string, page = 0, alphabetic?: 'asc' | 'desc', rating?: 'asc' | 'desc') {
         const limit = 10;
         const offset = page * limit;
+
+        const order = this.asignOrder(alphabetic, rating);
 
         const peliculas = await this.peliculasRepo.find({
             where: {
                 nombre: ILike(`%${key}%`),
             },
-            order: { nombre: 'ASC' },
+            order: order,
             skip: offset,
             take: limit,
         });
@@ -243,5 +270,35 @@ export class PeliculasService {
         }
 
         return { success: true, message: 'Película eliminada correctamente.' };
+    }
+
+    /**
+     * Valida que el nombre de un genero no este vacio
+     * 
+     * @param genero nombre del genero
+     */
+    private validateGenero(genero: string) {
+        if (!genero || genero.trim() === '') {
+            throw new BadRequestException('El género no puede estar vacío.');
+        }
+    }
+
+    /**
+     * Asigna un orden a utilizar en una busqueda dentro de la base de datos
+     * 
+     * @param alphabetic Ordenar lista alfabeticamente de forma ascendente o descendente
+     * @param rating Ordenar lista por rating de forma ascendente o descendente
+     * @returns Objeto con las propiedades de ordenamiento
+     */
+    private asignOrder(alphabetic?: 'asc' | 'desc', rating?: 'asc' | 'desc') {
+        const order: any = {};
+        if (alphabetic) {
+            order.nombre = alphabetic.toUpperCase();
+        } else if (rating) {
+            order.calificacion = rating.toUpperCase();
+        } else {
+            order.nombre = 'ASC';
+        }
+        return order;
     }
 }

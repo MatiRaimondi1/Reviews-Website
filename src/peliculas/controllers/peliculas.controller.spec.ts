@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { PeliculasController } from '../controllers/peliculas.controller';
 import { PeliculasService } from '../services/peliculas.service';
 import { CreatePeliculaDto } from '../dto/create-pelicula.dto';
+import { BadRequestException } from '@nestjs/common';
 
 describe('PeliculasController', () => {
     let controller: PeliculasController;
@@ -14,6 +15,7 @@ describe('PeliculasController', () => {
         delete: jest.fn(),
         findByKey: jest.fn(),
         findAllByKey: jest.fn(),
+        findByGeneroByKey: jest.fn(),
     };
 
     beforeEach(async () => {
@@ -118,8 +120,23 @@ describe('PeliculasController', () => {
 
             const result = await controller.searchAll('mat', 0);
 
-            expect(service.findAllByKey).toHaveBeenCalledWith('mat', 0);
+            expect(service.findAllByKey).toHaveBeenCalledWith('mat', 0, undefined, undefined);
             expect(result).toEqual(mockPeliculas);
         });
+    });
+
+    it('debería lanzar BadRequestException si query está vacía', async () => {
+        expect(() => controller.searchByGeneroByKey('accion', '')).toThrow(BadRequestException);
+        expect(() => controller.searchByGeneroByKey('accion', '   ')).toThrow(BadRequestException);
+    });
+
+    it('debería llamar a findByGeneroByKey si query es válida', async () => {
+        const resultadoMock = [{ id: 1, nombre: 'Matrix' }];
+        mockPeliculasService.findByGeneroByKey.mockResolvedValue(resultadoMock);
+
+        const result = await controller.searchByGeneroByKey('accion', 'mat', 0, 'asc', 'desc');
+
+        expect(service.findByGeneroByKey).toHaveBeenCalledWith('accion', 'mat', 0, 'asc', 'desc');
+        expect(result).toEqual(resultadoMock);
     });
 });

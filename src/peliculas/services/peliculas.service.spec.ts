@@ -279,4 +279,33 @@ describe('PeliculasService', () => {
         });
         expect(result.genero).toEqual(generoExistente);
     });
+
+    it('debería lanzar BadRequestException si nombreGenero es vacío', async () => {
+        await expect(service.findByGeneroByKey('', 'algo')).rejects.toThrow(BadRequestException);
+        await expect(service.findByGeneroByKey('  ', 'algo')).rejects.toThrow(BadRequestException);
+    });
+
+    it('debería lanzar NotFoundException si no hay películas para el género y clave dados', async () => {
+        repo.find.mockResolvedValue([]);
+        await expect(service.findByGeneroByKey('Accion', 'Matrix')).rejects.toThrow(NotFoundException);
+    });
+
+    it('debería retornar las películas encontradas para el género y clave dados', async () => {
+        const resultadoMock = [{ id: 1, nombre: 'Matrix', genero: { nombre: 'Accion' } }] as Pelicula[];
+        repo.find.mockResolvedValue(resultadoMock);
+
+        const result = await service.findByGeneroByKey('Accion', 'Matrix');
+        expect(result).toEqual(resultadoMock);
+        expect(repo.find).toHaveBeenCalledWith({
+            where: {
+                genero: {
+                    nombre: 'Accion',
+                },
+                nombre: expect.any(Object),
+            },
+            order: expect.any(Object),
+            skip: 0,
+            take: 10,
+        });
+    });
 });
