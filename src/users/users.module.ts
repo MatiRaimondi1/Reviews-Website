@@ -3,7 +3,6 @@ import { UsersService } from './services/users.service';
 import { UsersController } from './controllers/users.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { MembresiaGrupo } from 'src/grupos/entities/membresiaGrupo.entity';
 
 /**
  * Encapsula los providers de la entidad Users, y define que partes 

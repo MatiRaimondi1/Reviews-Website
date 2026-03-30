@@ -8,7 +8,7 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 async function bootstrap() {
     const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-    // API Config
+    /*
     app.enableCors({
         origin: [process.env.ORIGIN!],
         methods: ['GET', 'PUT', 'POST', 'DELETE', 'PATCH'],
@@ -16,6 +16,8 @@ async function bootstrap() {
         credentials: true,
         maxAge: 86400
     });
+    */
+   app.enableCors();
 
     app.useGlobalPipes(
         new ValidationPipe({
@@ -29,7 +31,6 @@ async function bootstrap() {
         prefix: '/uploads/',
     });
 
-    // Swagger Config
     const config = new DocumentBuilder()
         .setTitle('Reviews Website')
         .setDescription('Reviews website backend')

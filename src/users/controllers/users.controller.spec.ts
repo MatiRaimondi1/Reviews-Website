@@ -72,5 +72,4 @@ describe('UsersController', () => {
             expect(result).toEqual({ message: 'Imagen de perfil cambiada correctamente.' });
         });
     });
-
 })

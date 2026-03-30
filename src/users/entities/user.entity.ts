@@ -1,7 +1,7 @@
 import { Comentario } from "src/comentarios/entities/comentario.entity";
 import { MembresiaGrupo } from "src/grupos/entities/membresiaGrupo.entity";
 import { Review } from "src/reviews/entities/review.entity";
-import { Entity, PrimaryGeneratedColumn, Column, DeleteDateColumn, CreateDateColumn, OneToMany, ManyToMany } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, DeleteDateColumn, CreateDateColumn, OneToMany } from "typeorm";
 
 @Entity()
 export class User {

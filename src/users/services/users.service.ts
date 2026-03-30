@@ -75,7 +75,7 @@ export class UsersService {
      * Cambia la imagen de perfil del usuario
      * 
      * @param userId ID del usuario
-     * @param imageUrl URL de la imagen ed perfil
+     * @param imageUrl URL de la imagen de perfil
      * @returns Mensaje de exito
      */
     async updateProfileImage(userId: number, imageUrl: string) {
